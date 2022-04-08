@@ -1,5 +1,14 @@
-https://www.hackthebox.com/achievement/machine/998467/432
 
+![Paper](https://user-images.githubusercontent.com/68706090/162376267-a63e4e9e-fc56-4107-bb60-7925dcb4b525.png)
+
+This is my write-up for Paper
+
+Difficulty
+My Difficulty: Easy
+
+There was a couple annoying factors of this box like communicating with the chat bot, but overal it was fairly simple 
+
+Try Hackme Difficulty: Easy
 
 # ENUMERATION
 
