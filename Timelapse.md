@@ -1,3 +1,17 @@
+# Timelapse
+
+This is my write-up for the room Timelapse
+
+
+## Difficulty
+My Difficulty: Medium (this box I was forced to really dig for enumeration and learn a few things that I have never done before. 
+
+Try Hackme Difficulty: Easy
+
+![Timelapse](https://user-images.githubusercontent.com/68706090/163875576-d0272fa7-6daf-4598-a866-e536388a6fe6.png)
+
+
+
 # Enumeration
 
 ### NMAP
