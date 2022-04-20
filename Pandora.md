@@ -1,4 +1,16 @@
-  # Enumeration
+  # Pandora
+
+This is my write-up for the room Pandora
+
+
+## Difficulty
+My Difficulty: Medium (this box I was forced to really dig for enumeration and learn a few things that I have never done before. 
+
+Try Hackme Difficulty: Easy
+
+![Pandora](https://user-images.githubusercontent.com/68706090/164324434-a44c1fbd-3cfe-416b-a895-1ca624cbebd5.png)
+
+    # Enumeration
   
   ### NMAP
   
