@@ -284,3 +284,9 @@ SMB         10.10.10.149    445    SUPPORTDESK      [+] SupportDesk\chase:Q4)sJu
 
 We have more credentials  SupportDesk\chase:Q4)sJu\Y8qz*A3?d 
 ```
+Lets checkout what processes are running on the machine
+
+```console
+*Evil-WinRM* PS C:\users\chase> ps
+```
+We can see that the user is running firefox
