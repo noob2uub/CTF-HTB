@@ -58,3 +58,21 @@ American Express,377366981475361
 American Express,372488673094519
 ```
 One is not like the otheres 
+
+or to save time run strings on the file :)
+
+```console
+noob2uub@kali:~/ctf/htb/MarketDump$ strings MarketDump.pcapng 
+Intel(R) Core(TM) i5-4200U CPU @ 1.60GHz (with SSE4.2)
+Linux 4.16.0-kali2-amd64
+Dumpcap (Wireshark) 2.6.1 (Git v2.6.1 packaged as 2.6.1-1)
+eth0	
+Linux 4.16.0-kali2-amd64
+```
+
+Now just decode it with Base58 :) I used 
+
+![image](https://user-images.githubusercontent.com/68706090/166342839-90bfeb8b-466c-4c5f-9807-2a0f993894e1.png)
+
+
+By the way I at first I thought cracking the zip was part of it, so I spent time using john lol. Took me a while until I decided to read the box in more detail. 
