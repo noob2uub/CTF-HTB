@@ -133,6 +133,19 @@ Lost your password?
 </p>
 ```
 
+I am thinking some type of RCE, but its taking images and reading them.
+
+I found this website, which makes things start to click. 
+
+https://akshukatkar.medium.com/rce-with-flask-jinja-template-injection-ea5d0201b870
+
+By creating this image with this condition I am able to recieve an output.
+
+![image](https://user-images.githubusercontent.com/68706090/167187438-4075c1d1-4cba-4a67-859c-f64b442e73ff.png)
+
+![image](https://user-images.githubusercontent.com/68706090/167187538-8e0eda03-f624-418e-855f-b55f1aecca26.png)
+
+So we know that this is working. 
 
 
 
