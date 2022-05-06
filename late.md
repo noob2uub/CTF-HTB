@@ -309,6 +309,7 @@ nothing on that seems useful so lets run linpeas on the box.
 
 a few things to take a look at:
 
+```consol
 #)You_can_write_even_more_files_inside_last_directory
 
 /usr/local/sbin
@@ -368,8 +369,65 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ╚ https://book.hacktricks.xyz/linux-unix/privilege-escalation#writable-path-abuses
 /home/svc_acc/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 New path exported: /home/svc_acc/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+```
+So I can write things to usr/local/sbin and found this 
 
+```consol
+  GNU nano 2.9.3                                                                                       ssh-alert.sh                                                                                        Modified  
 
+#!/bin/bash
+
+RECIPIENT="root@late.htb"
+SUBJECT="Email from Server Login: SSH Alert"
+
+BODY="
+A SSH login was detected.
+
+        User:        $PAM_USER
+        User IP Host: $PAM_RHOST
+        Service:     $PAM_SERVICE
+        TTY:         $PAM_TTY
+        Date:        `date`
+        Server:      `uname -a`
+"
+
+if [ ${PAM_TYPE} = "open_session" ]; then
+        echo "Subject:${SUBJECT} ${BODY}" | /usr/sbin/sendmail ${RECIPIENT}
+fi
+```
+
+Its is using the sendmail function which there is also an exploit for. 
+
+I wasn't able to write to this file so lets take allot out the sendmail exploit now. 
+
+A further search brought this up too.
+
+```console
+/usr/sbin/pppd
+/usr/sbin/sensible-mda
+/usr/bin/chfn
+/usr/bin/newuidmap
+/usr/bin/passwd
+/usr/bin/traceroute6.iputils
+/usr/bin/newgrp
+/usr/bin/sudo
+/usr/bin/chsh
+/usr/bin/arping
+/usr/bin/procmail
+/usr/bin/newgidmap
+/usr/bin/gpasswd
+/usr/bin/at
+/usr/lib/openssh/ssh-keysign
+/usr/lib/eject/dmcrypt-get-device
+/usr/lib/dbus-1.0/dbus-daemon-launch-helper
+/usr/lib/policykit-1/polkit-agent-helper-1
+/usr/lib/x86_64-linux-gnu/lxc/lxc-user-nic
+/bin/fusermount
+/bin/mount
+/bin/su
+/bin/ping
+/bin/umount
+```
 
 
 
