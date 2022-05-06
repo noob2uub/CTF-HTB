@@ -86,6 +86,52 @@ OS and Service detection performed. Please report any incorrect results at https
 
 This might be something interested to take a look at.
 
+After digging around for a bit, I couldn't find anything and discovered images.late.htb
+
+```console
+<!-- container -->
+	<div class="container">
+
+		<h2 class="text-center top-space">Frequently Asked Questions</h2>
+		<br>
+
+		<div class="row">
+			<div class="col-sm-6">
+				<h3>What's photo editing?</h3>
+				<p>Photo editing is a fast digital way to perfect an image. Although cameras and phones are great devices for taking photos, sometimes they are not the greatest at capturing the best shots. Photo editing allows you to polish images by the lighting and colors, adding photo effects, blurring the background, removing unwanted items to make your photos beautiful. Editing photos with Late's best online photo editor and get more even more out of your photos. </p>
+			</div>
+			<div class="col-sm-6">
+				<h3> How can I edit photos online for free?</h3>
+				<p>With <a href="http://images.late.htb/">late free online photo editor</a>, you can do just that. First, open Late's free online photo editor website. Second, choose one editing feature you need, such as basic adjustments, portrait beauty, or photo effects from the left dashboard. Third, apply the feature, download, and share your final piece. </p>
+			</div>
+		</div> <!-- /row -->
+```
+So I added late.htb and images.late.htb to the host file and that did not work. Thinking further images.late.htb is a reverse proxy. So I loaded up foxyproxy and configured it. 
+
+![image](https://user-images.githubusercontent.com/68706090/167180130-df7b67bc-8dd2-485d-861d-712e806bbb3c.png)
+
+which took me to this page 
+
+![image](https://user-images.githubusercontent.com/68706090/167180220-1aa3df98-c4b7-4657-bfd0-f5da51e94aac.png)
+
+Scanning an image resulted in this. 
+
+```console
+<p>Error: The password you entered for the username
+admin is incorrect. Lost your password?
+
+Username or Email Address
+
+admin
+Password
+®
+CO Remember Me lent
+Lost your password?
+
+© Go to Backdoor
+
+</p>
+```
 
 
 
