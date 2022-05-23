@@ -480,11 +480,7 @@ root
 # 
 ```
 
-																	       
-																	       
-																	       
-
-
+Another way to just get the flag, but not root is to amend the flag itself in the .sh file by running cat /root/root.txt >> /home/svc_acc/root.txt and then cat /home/svc_acc/ssh-alert.sh >> ssh-alert.sh and that will put the root.txt flag in your home directory. 
 
 
 
