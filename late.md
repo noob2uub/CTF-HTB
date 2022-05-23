@@ -428,7 +428,17 @@ A further search brought this up too.
 /bin/ping
 /bin/umount
 ```
+Lets take a further look 
 
+╔══════════╣ PATH                                                                                                                                                   
+╚ https://book.hacktricks.xyz/linux-hardening/privilege-escalation#writable-path-abuses                                                                             
+/home/svc_acc/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin                                         
+New path exported: /home/svc_acc/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin  
+
+no luck with this, but going back to the ssh-alert.sh
+                                                                                                                                               
+																	       
+																	       
 
 
 
